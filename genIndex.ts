@@ -1,4 +1,3 @@
-// @ts-check
 import { createReadStream, createWriteStream } from "node:fs";
 import { CSVStream } from "./util";
 

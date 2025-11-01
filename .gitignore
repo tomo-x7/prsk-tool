@@ -23,4 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
+# 大きすぎるのでgit外で管理
 data.csv
+# データ生成に使う一時ファイル
+temp.csv
