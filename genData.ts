@@ -1,6 +1,5 @@
-import { appendFileSync, createReadStream, createWriteStream, writeFileSync, WriteStream } from "node:fs";
+import { createReadStream, createWriteStream, mkdirSync, rm, type WriteStream } from "node:fs";
 import { CSVStream } from "./util";
-import { mkdirSync, rm } from "node:fs";
 
 process.chdir(import.meta.dirname);
 

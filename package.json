@@ -1,33 +1,33 @@
 {
-  "name": "prsk-tool",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "2.2.3",
-    "@types/node": "^24.6.0",
-    "@types/react": "^19.1.16",
-    "@types/react-dom": "^19.1.9",
-    "@vitejs/plugin-react-swc": "^4.1.0",
-    "tsx": "^4.20.6",
-    "typescript": "~5.9.3",
-    "vite": "^7.1.7"
-  },
-  "pnpm": {
-    "ignoredBuiltDependencies": [],
-    "onlyBuiltDependencies": [
-      "@swc/core",
-      "esbuild"
-    ]
-  }
+	"name": "prsk-tool",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc -b && vite build",
+		"check": "biome check --write",
+		"preview": "vite preview"
+	},
+	"dependencies": {
+		"react": "^19.1.1",
+		"react-dom": "^19.1.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.2.3",
+		"@types/node": "^24.6.0",
+		"@types/react": "^19.1.16",
+		"@types/react-dom": "^19.1.9",
+		"@vitejs/plugin-react-swc": "^4.1.0",
+		"tsx": "^4.20.6",
+		"typescript": "~5.9.3",
+		"vite": "^7.1.7"
+	},
+	"pnpm": {
+		"ignoredBuiltDependencies": [],
+		"onlyBuiltDependencies": [
+			"@swc/core",
+			"esbuild"
+		]
+	}
 }
