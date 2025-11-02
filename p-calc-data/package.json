@@ -1,0 +1,8 @@
+{
+	"name": "data",
+	"version": "1.0.0",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/node": "^24.9.1"
+	}
+}

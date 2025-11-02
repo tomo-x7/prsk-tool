@@ -1,8 +1,12 @@
 import { createReadStream, createWriteStream } from "node:fs";
 import { CSVStream } from "./util";
+import { join } from "node:path";
+import { OUT } from "./const";
+
+process.chdir(import.meta.dirname);
 
 const stream = createReadStream("./data.csv").pipe(new CSVStream());
-const out = createWriteStream("./public/p-calc/index.csv");
+const out = createWriteStream(join(OUT, "index.csv"));
 const obj: Record<string, Set<number> | undefined> = {};
 stream.on("data", (raw: Buffer | string) => {
 	const [scoreRatio, eventRatio, musicRatio, liveRatio, pointStr] = raw.toString().split(",");

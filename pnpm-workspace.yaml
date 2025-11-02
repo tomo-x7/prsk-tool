@@ -1,0 +1,6 @@
+packages:
+  - web
+  - p-calc-data
+
+onlyBuiltDependencies:
+  - esbuild
