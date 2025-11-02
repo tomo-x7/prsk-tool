@@ -12,4 +12,10 @@ export class CSVStream extends Transform {
 		this.buf = strArr.at(-1) || "";
 		callback();
 	}
+	_flush(callback: TransformCallback): void {
+		if (this.buf) {
+			this.push(this.buf.trim());
+		}
+		callback();
+	}
 }
