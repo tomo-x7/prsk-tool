@@ -1,0 +1,10 @@
+{
+	"$schema": "https://unpkg.com/wrangler@latest/config-schema.json",
+	"name": "prsk-tools",
+	"compatibility_date": "2025-11-03",
+	"workers_dev": false,
+	"assets": {
+		"directory": "./web/dist",
+		"not_found_handling": "single-page-application"
+	},
+}
