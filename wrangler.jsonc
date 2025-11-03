@@ -10,5 +10,6 @@
 	"build": {
 		"command": "pnpm run build",
 		"cwd": "web"
-	}
+	},
+	"preview_urls": true
 }
