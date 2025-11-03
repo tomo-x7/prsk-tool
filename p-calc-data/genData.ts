@@ -1,7 +1,7 @@
 import { createReadStream, createWriteStream, mkdirSync, rm, type WriteStream } from "node:fs";
-import { CSVStream } from "./util";
 import { join } from "node:path";
 import { OUT } from "./const";
+import { CSVStream } from "./util";
 
 process.chdir(import.meta.dirname);
 
