@@ -4,5 +4,6 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@types/node": "^24.9.1"
-	}
+	},
+	"type": "module"
 }

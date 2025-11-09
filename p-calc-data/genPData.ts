@@ -4,13 +4,14 @@ import { OUT } from "./const";
 import { CSVStream } from "./util";
 
 process.chdir(import.meta.dirname);
+const DATA_OUT = join(OUT, "p");
 
 function genTemp() {
 	const source = createReadStream("./data.csv").pipe(new CSVStream());
 	const tempStreams: Record<string, WriteStream | undefined> = {};
 	for (let i = 0; i < 100; i += 1) {
-		mkdirSync(join(OUT, i.toString()), { recursive: true });
-		tempStreams[i.toString()] = createWriteStream(join(OUT, i.toString(), "temp.csv"), {});
+		mkdirSync(join(DATA_OUT, i.toString()), { recursive: true });
+		tempStreams[i.toString()] = createWriteStream(join(DATA_OUT, i.toString(), "temp.csv"), {});
 	}
 	source.on("data", (raw: Buffer | string) => {
 		const [scoreRatio, eventRatio, musicRatio, liveRatio, point] = raw.toString().split(",");
@@ -39,13 +40,13 @@ function genTemp() {
 await genTemp();
 
 for (let i = 0; i < 100; i++) {
-	const source = createReadStream(join(OUT, i.toString(), "temp.csv")).pipe(new CSVStream());
+	const source = createReadStream(join(DATA_OUT, i.toString(), "temp.csv")).pipe(new CSVStream());
 	const outStreams = new Map<number, WriteStream>();
 	source.on("data", (raw: Buffer | string) => {
 		const [scoreRatio, eventRatio, musicRatio, liveRatio, point] = raw.toString().split(",");
 		const key = Number.parseInt(point, 10);
 		if (!outStreams.has(key)) {
-			outStreams.set(key, createWriteStream(join(OUT, i.toString(), `${key}.csv`)));
+			outStreams.set(key, createWriteStream(join(DATA_OUT, i.toString(), `${key}.csv`)));
 		}
 		outStreams.get(key)!.write(`${scoreRatio},${eventRatio},${musicRatio},${liveRatio}\n`);
 	});
@@ -57,6 +58,6 @@ for (let i = 0; i < 100; i++) {
 				outStreams.delete(key);
 			});
 		}
-		rm(join(OUT, i.toString(), "temp.csv"), () => {});
+		rm(join(DATA_OUT, i.toString(), "temp.csv"), () => {});
 	});
 }

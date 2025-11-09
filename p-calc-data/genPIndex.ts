@@ -6,20 +6,21 @@ import { CSVStream } from "./util";
 process.chdir(import.meta.dirname);
 
 const stream = createReadStream("./data.csv").pipe(new CSVStream());
-const out = createWriteStream(join(OUT, "index.csv"));
-const obj: Record<string, Set<number> | undefined> = {};
+const out = createWriteStream(join(OUT, "p-index.csv"));
+const pRecord: Record<string, Set<number> | undefined> = {};
 stream.on("data", (raw: Buffer | string) => {
 	const [scoreRatio, eventRatio, musicRatio, liveRatio, pointStr] = raw.toString().split(",");
 	const point = Number.parseInt(pointStr, 10);
-	if (obj[point] == null) obj[point] = new Set();
-	obj[point].add(Number.parseInt(eventRatio, 10));
+
+	if (pRecord[point] == null) pRecord[point] = new Set();
+	pRecord[point].add(Number.parseInt(eventRatio, 10));
 });
-stream.on("close", () => {
-	for (const key of Object.keys(obj).toSorted((a, b) => Number.parseInt(b, 10) - Number.parseInt(a, 10))) {
+stream.on("end", () => {
+	for (const key of Object.keys(pRecord).toSorted((a, b) => Number.parseInt(b, 10) - Number.parseInt(a, 10))) {
 		out.write(
 			key +
 				"," +
-				Array.from(obj[key] ?? [])
+				Array.from(pRecord[key] ?? [])
 					.toSorted((a, b) => a - b)
 					.join(",") +
 				"\n",
