@@ -108,8 +108,8 @@ i32 buildResult(i32 x) {
 	}
 	return 0;
 }
-i32 getResultPointer() {
-	return (i32)resultPointer;
+void* getResultPointer() {
+	return resultPointer;
 }
 i32 getResultSize() {
 	return resultSize;
@@ -121,10 +121,11 @@ void resetDp() {
 	dpSize = 0;
 	resultPointer = 0;
 	resultSize = 0;
+	bumpPointer = bonusPointer + bonusLength * 4;
 }
 void resetAll() {
+	resetDp();
 	bumpPointer = 0;
 	bonusPointer = 0;
 	bonusLength = 0;
-	resetDp();
 }
