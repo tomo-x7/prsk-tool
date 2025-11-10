@@ -36,11 +36,6 @@ void setBonusFin(i32 size) {
 	// i32を利用するので配列長*4
 	bumpPointer += size * 4;
 }
-void resetAll() {
-	bumpPointer = 0;
-	bonusPointer = 0;
-	bonusLength = 0;
-}
 
 inline i32 bonus(i32 i) {
 	return *(i32*)(bonusPointer + i * 4);
@@ -76,6 +71,7 @@ void calc(i32 x) {
 	bumpPointer += dpSize * 4;
 	parentPointer = bumpPointer;
 	bumpPointer += dpSize * 4;
+	resultPointer = bumpPointer;
 	i32 INF = x + 1;
 	for (i32 i = 0; i < dpSize; i++) {
 		*dp(i) = INF;
@@ -96,7 +92,39 @@ void calc(i32 x) {
 		}
 	}
 }
+
 i32 getResult(i32 x) {
 	return *dp(dpSize - x - 1);
 }
-void buildResult(i32 x) {}
+i32 buildResult(i32 x) {
+	int r = dpSize - x - 1;
+	resultSize = 0;
+	while (r > 0) {
+		i32 p = *parent(r);
+		if (p < 0) return -1;
+		*result(resultSize) = p;
+		resultSize++;
+		r -= p;
+	}
+	return 0;
+}
+i32 getResultPointer() {
+	return (i32)resultPointer;
+}
+i32 getResultSize() {
+	return resultSize;
+}
+
+void resetDp() {
+	dpPointer = 0;
+	parentPointer = 0;
+	dpSize = 0;
+	resultPointer = 0;
+	resultSize = 0;
+}
+void resetAll() {
+	bumpPointer = 0;
+	bonusPointer = 0;
+	bonusLength = 0;
+	resetDp();
+}
