@@ -1,5 +1,5 @@
 // ボーナス値(%)ごと
-import { createReadStream, createWriteStream, mkdirSync, rm, type WriteStream } from "node:fs";
+import { createReadStream, createWriteStream, mkdirSync, type WriteStream } from "node:fs";
 import { join } from "node:path";
 import { OUT } from "./const";
 import { CSVStream } from "./util";

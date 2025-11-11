@@ -1,6 +1,7 @@
 import wasm from "./p-calc.wasm?url";
+import PCalcWorker from "./p-calc.worker?worker";
 
-interface Exports {
+export interface Exports {
 	memory: WebAssembly.Memory;
 	setBonusArray: () => number;
 	setBonusFin: (size: number) => void;
@@ -11,15 +12,25 @@ interface Exports {
 	getResultSize: () => number;
 	resetDp: () => void;
 	resetAll: () => void;
+	// worker用
+	_init: () => void;
 }
+export type Kind = keyof Omit<Exports, "memory">;
+export type Result<T extends Kind> = { data: ReturnType<Exports[T]>; id: number };
+export interface Message<T extends Kind> {
+	kind: T;
+	param: Parameters<Exports[T]>;
+	id: number;
+}
+type PromiseLike<T> = T | Promise<T>;
 interface CreateResult {
-	next: (bonus: number) => Promise<SetBonusResult>;
+	next: (bonus: number) => PromiseLike<SetBonusResult>;
 }
 interface SetBonusResult {
-	next: (p: number) => Promise<CalcResult>;
+	next: (p: number) => PromiseLike<CalcResult>;
 }
 interface CalcResult {
-	next: (p: number) => void;
+	next: (p: number) => PromiseLike<void>;
 }
 
 export async function createPCalc(): Promise<CreateResult> {
@@ -43,8 +54,25 @@ function setBonusOuter(instance: WebAssembly.Instance, exports: Exports) {
 
 function calcOuter(instance: WebAssembly.Instance, exports: Exports): (p: number) => Promise<CalcResult> {
 	return async (p: number): Promise<CalcResult> => {
+		exports.resetDp();
 		exports.calc(p);
-		const canSimple = exports.getResult(0) < p;
+		const simple = exports.getResult(0) < p;
 		return { next: () => void 0 };
 	};
 }
+
+let id = 1;
+const worker = new PCalcWorker();
+function doWasm<T extends Kind>(body: Omit<Message<T>, "id">): Promise<Result<T>["data"]> {
+	return new Promise((resolve) => {
+		const curId = id++;
+		const listner = (evt: MessageEvent<Result<T>>) => {
+			if (evt.data.id !== curId) return;
+			worker.removeEventListener("message", listner);
+			resolve(evt.data.data);
+		};
+		worker.addEventListener("message", listner);
+		worker.postMessage({ ...body, id: curId } satisfies Message<T>);
+	});
+}
+worker.addEventListener("error", () => {});
