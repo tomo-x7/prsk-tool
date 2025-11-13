@@ -1,5 +1,4 @@
-import wasm from "./p-calc.wasm?url";
-import PCalcWorker from "./p-calc.worker?worker";
+import PCalcWorker from "./worker.ts?worker";
 
 export interface Exports {
 	memory: WebAssembly.Memory;
@@ -19,15 +18,13 @@ export type Kind = keyof Omit<Exports, "memory">;
 export type Result<T extends Kind> = { data: ReturnType<Exports[T]>; id: number };
 export interface Message<T extends Kind> {
 	kind: T;
-	param: Parameters<Exports[T]> extends never[]?undefined:Parameters<Exports[T]>;
+	param: Parameters<Exports[T]> extends never[] ? undefined : Parameters<Exports[T]>;
 	id: number;
 }
 
-async function init(){
-	await doWasm({kind:"_init",param:undefined})
+async function init() {
+	await doWasm({ kind: "_init", param: undefined });
 }
-
-
 
 let id = 1;
 const worker = new PCalcWorker();
