@@ -1,28 +1,38 @@
-import type { Kind, Message, Result } from "./algo";
 import wasmUrl from "./p-calc.wasm?url";
+import type { Exports, Func, WorkerMessages } from "./types";
 
-let wasm: WebAssembly.Instance | null = null;
+let wasm: (WebAssembly.Instance & { exports: Exports }) | null = null;
 
-addEventListener("message", async (ev: MessageEvent<Message<Kind>>) => {
-	if (ev.data.kind === "_init") {
-		if (wasm != null) return postMessage({ id: ev.data.id, data: undefined } satisfies Result<"_init">);
-		const { instance } = await WebAssembly.instantiateStreaming(fetch(wasmUrl), {
-			env: {
-				fatal: (code: number) => {
-					throw new Error(`Fatal error in WebAssembly module. Code: ${code}`);
-				},
+const init: Func<"init"> = async () => {
+	if (wasm != null) return null;
+	const { instance } = await WebAssembly.instantiateStreaming(fetch(wasmUrl), {
+		env: {
+			fatal: (code: number) => {
+				throw new Error(`Fatal error in WebAssembly module. Code: ${code}`);
 			},
-		});
-		wasm = instance;
-		postMessage({ id: ev.data.id, data: undefined } satisfies Result<"_init">);
-	} else {
-		if (wasm == null) throw new Error("WASM module not initialized");
-		const kind = ev.data.kind;
-		const fn = wasm.exports[kind];
-		if (typeof fn !== "function") throw new Error(`Function ${kind} not found in WASM module`);
-		const result = (fn as (...args: typeof ev.data.param) => Result<Kind>["data"])(...(ev.data.param ?? []));
-		postMessage({ id: ev.data.id, data: result } satisfies Result<Kind>);
-	}
+		},
+	});
+	wasm = instance as WebAssembly.Instance & { exports: Exports };
+	return null;
+};
+const setBonus: Func<"setBonus"> = async ({ data: bonus }) => {
+	if (wasm == null) throw new Error("WASM module not initialized");
+	return null;
+};
+
+const functions = {
+	init,
+	setBonus,
+} satisfies { [K in keyof WorkerMessages]: Func<K> };
+
+addEventListener("message", async (ev: MessageEvent<WorkerMessages[keyof WorkerMessages]["Request"]>) => {
+	// @ts-expect-error 型推論が効かない
+	const res = await functions[ev.data.type](ev.data);
+	postMessage({
+		type: ev.data.type,
+		id: ev.data.id,
+		data: res,
+	} satisfies WorkerMessages[typeof ev.data.type]["Response"]);
 });
 
 addEventListener("unhandledrejection", (e) => {
