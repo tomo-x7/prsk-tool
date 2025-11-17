@@ -36,4 +36,4 @@ export interface Result {
 	score: number;
 	liveB: number;
 }
-export type DataMap = Map<number, Omit<Result, "bonus">[]>;
+export type DataMap = Map<number, Omit<Result, "bonus" | "point">[]>;

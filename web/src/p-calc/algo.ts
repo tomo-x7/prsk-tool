@@ -1,32 +1,64 @@
 import { create } from "zustand";
-import type { WorkerMessages } from "./types";
+import { subscribeWithSelector } from "zustand/middleware";
+import type { Result, WorkerMessages } from "./types";
 import PCalcWorker from "./worker.ts?worker";
 
 // ストア
 interface State {
-	// wasmなどの初期化終了
-	initLoaded: boolean;
-	bonus: number | null;
 	error: Error | null;
-	result: null | number[];
+	bonus: number | null;
+	max: number | null;
+	canCalc: boolean;
+	x: number | null;
+	result: null | Result[];
 	lock: boolean;
 }
-interface Action {
-	loadfin: () => void;
-}
-export const store = create<State & Action>()((set) => ({
-	bonus: null,
-	error: null,
-	initLoaded: false,
-	loadfin: () => set({ initLoaded: true }),
-	result: null,
-	lock: false,
-}));
+export const useStore = create<State >()(
+	subscribeWithSelector((set) => ({
+		error: null,
+		bonus: null,
+		max: null,
+		canCalc: false,
+		x: null,
+		result: null,
+		lock: false,
+	})),
+);
+const lock = () => useStore.setState({ lock: true });
+const unlock = () => useStore.setState({ lock: false });
+const error = (err: Error) => useStore.setState({ error: err });
+export const useLocked = () => useStore((s) => s.lock);
 
 // 最下部で呼んでる
 async function init() {
+	console.log("init called");
 	await sendWorker("init", null);
-	store.getState().loadfin();
+}
+
+export async function setBonus() {
+	const { bonus, max } = useStore.getState();
+	if (bonus == null || max == null) return void error(new Error("bonus or max is null"));
+	lock();
+	useStore.setState({ canCalc: false });
+	await sendWorker("setBonus", { bonus, max })
+		?.then(() => {
+			useStore.setState({ canCalc: true });
+		})
+		.finally(() => unlock());
+	unlock();
+}
+
+export async function calc() {
+	const { x, canCalc } = useStore.getState();
+	if (x == null || !canCalc) return void error(new Error("x is null or cannot calculate"));
+	lock();
+	useStore.setState({ result: null });
+	await sendWorker("calc", x)
+		?.then((res) => {
+			useStore.setState({ result: res });
+		})
+		.finally(() => unlock());
+	unlock();
 }
 
 // Worker通信
@@ -36,7 +68,7 @@ function sendWorker<T extends keyof WorkerMessages>(
 	key: T,
 	data: WorkerMessages[T]["Request"]["data"],
 ): Promise<WorkerMessages[T]["Response"]["data"]> | undefined {
-	if (locked) return void store.setState({ error: new Error("worker locked") });
+	if (locked) return void error(new Error("worker locked"));
 	locked = true;
 	return new Promise((resolve) => {
 		const listner = (evt: MessageEvent<WorkerMessages[T]["Response"]>) => {
@@ -49,7 +81,7 @@ function sendWorker<T extends keyof WorkerMessages>(
 	});
 }
 worker.addEventListener("error", (e) => {
-	store.setState({ error: e.error instanceof Error ? e.error : new Error(e.error) });
+	useStore.setState({ error: e.error instanceof Error ? e.error : new Error(e.error) });
 });
 
-init();
+export const initPromise = init();

@@ -49,14 +49,15 @@ function readResult({ pointer, size }: { pointer: number; size: number }): Resul
 	if (data == null) throw new Error("data not set");
 	if (curBonus == null) throw new Error("curBonus not set");
 	const I32Arr = new Int32Array(wasm.exports.memory.buffer, pointer, size);
-	const result:Result[]=[]
+	const result: Result[] = [];
+	console.log(I32Arr);
 	for (const v of I32Arr) {
 		const arr = data.get(v);
 		if (arr == null || arr.length === 0) throw new Error("invalid");
 		const r = arr.sort((a, b) => a.liveB - b.liveB)[0];
-		result.push({ ...r, bonus: curBonus });
+		result.push({ ...r, bonus: curBonus, point: v });
 	}
-	return result
+	return result;
 }
 const calc: Func<"calc"> = async ({ data: x }) => {
 	assertWasm(wasm);
@@ -69,8 +70,8 @@ const calc: Func<"calc"> = async ({ data: x }) => {
 		const data = getResultData(0);
 		return readResult(data);
 	} else {
+		throw new Error("ベータ版のため未対応なケースです。開発者までお知らせください。");
 	}
-	throw new Error();
 };
 
 const functions = {

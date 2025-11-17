@@ -1,7 +1,7 @@
 import type { DataMap } from "./types";
 
 export async function fetchBonusArray(bonus: number, filter: (n: number) => boolean, write: (n: number) => void) {
-	const body = await fetch(`http://prsk-tool.tomo-x.win/p-calc/b/${bonus}.csv`).then((r) => r.body);
+	const body = await fetch(`/p-calc/b/${bonus}.csv`).then((r) => r.body);
 	if (body == null) return null;
 	const stream = body.pipeThrough(new TextDecoderStream()).pipeThrough(new CSVStream());
 	const reader = stream.getReader();
@@ -17,8 +17,8 @@ export async function fetchBonusArray(bonus: number, filter: (n: number) => bool
 		if (point == null || score == null || music == null || liveB == null) continue;
 		if (filter(score) === false) continue;
 		write(point);
-		if (data.get(bonus) == null) data.set(bonus, []);
-		data.get(bonus)!.push({ point, music, score, liveB });
+		if (data.get(point) == null) data.set(point, []);
+		data.get(point)!.push({ music, score, liveB });
 	}
 	return data;
 }
