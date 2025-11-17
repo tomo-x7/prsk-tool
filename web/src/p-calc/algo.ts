@@ -9,16 +9,18 @@ interface State {
 	bonus: number | null;
 	max: number | null;
 	canCalc: boolean;
+	now: number | null;
 	x: number | null;
 	result: null | Result[];
 	lock: boolean;
 }
-export const useStore = create<State >()(
+export const useStore = create<State>()(
 	subscribeWithSelector((set) => ({
 		error: null,
 		bonus: null,
 		max: null,
 		canCalc: false,
+		now: null,
 		x: null,
 		result: null,
 		lock: false,
@@ -39,13 +41,15 @@ export async function setBonus() {
 	const { bonus, max } = useStore.getState();
 	if (bonus == null || max == null) return void error(new Error("bonus or max is null"));
 	lock();
-	useStore.setState({ canCalc: false });
-	await sendWorker("setBonus", { bonus, max })
-		?.then(() => {
-			useStore.setState({ canCalc: true });
-		})
-		.finally(() => unlock());
-	unlock();
+	useStore.setState({ canCalc: false, result: null });
+	const p = sendWorker("setBonus", { bonus, max });
+	if (p == null) return void unlock();
+	try {
+		await p;
+		useStore.setState({ canCalc: true });
+	} finally {
+		unlock();
+	}
 }
 
 export async function calc() {
@@ -70,6 +74,7 @@ function sendWorker<T extends keyof WorkerMessages>(
 ): Promise<WorkerMessages[T]["Response"]["data"]> | undefined {
 	if (locked) return void error(new Error("worker locked"));
 	locked = true;
+	worker.dispatchEvent;
 	return new Promise((resolve) => {
 		const listner = (evt: MessageEvent<WorkerMessages[T]["Response"]>) => {
 			worker.removeEventListener("message", listner);
@@ -81,7 +86,10 @@ function sendWorker<T extends keyof WorkerMessages>(
 	});
 }
 worker.addEventListener("error", (e) => {
-	useStore.setState({ error: e.error instanceof Error ? e.error : new Error(e.error) });
+	useStore.setState({ error: e.error instanceof Error ? e.error : new Error(e.error || e.message) });
+	try {
+		worker.terminate();
+	} catch {}
 });
 
 export const initPromise = init();

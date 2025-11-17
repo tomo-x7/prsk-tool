@@ -1,8 +1,10 @@
 import type { DataMap } from "./types";
 
 export async function fetchBonusArray(bonus: number, filter: (n: number) => boolean, write: (n: number) => void) {
-	const body = await fetch(`/p-calc/b/${bonus}.csv`).then((r) => r.body);
-	if (body == null) return null;
+	const res = await fetch(`/p-calc/b/${bonus}.csv`);
+	if (!res.ok) throw new Error(`データ取得エラー: ${res.statusText}`);
+	const body = res.body;
+	if (body == null) throw new Error(`Response body is null. ${res.statusText}`);
 	const stream = body.pipeThrough(new TextDecoderStream()).pipeThrough(new CSVStream());
 	const reader = stream.getReader();
 	const data: DataMap = new Map();

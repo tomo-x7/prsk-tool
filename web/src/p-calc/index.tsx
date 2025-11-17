@@ -1,6 +1,9 @@
 import { use, useState } from "react";
+import { createCallable } from "react-call";
+import { Button, Card, NumberInput } from "../Components";
 import { calc, initPromise, setBonus, useLocked, useStore } from "./algo";
-// import {useStore} from "zustand"
+import { LIVEB_REVERSE_MAP, MUSIC_MAP } from "./const";
+import type { Result } from "./types";
 
 export default function PCalc() {
 	use(initPromise);
@@ -9,24 +12,33 @@ export default function PCalc() {
 	const canCalc = useStore((s) => s.canCalc);
 	const result = useStore((s) => s.result);
 	if (error) {
-		return <div>エラーが発生しました: {error.message}</div>;
+		return (
+			<div>
+				<Card>
+					<div className="text-red-600">エラーが発生しました: {String(error)}</div>
+				</Card>
+			</div>
+		);
 	}
 	return (
 		<div>
-			<div>ポ調ツールβ</div>
-			<Bonus />
-			{canCalc && <Calc />}
-			{result && <Result />}
+			<div>イベント編成そのままでできるポイント調整ツールです。</div>
+			<div>イベントボーナスは小数には対応していません(WL時)。</div>
+			<BonusView />
+			{canCalc && <CalcView />}
+			{result && <ResultView />}
 			{locked && <div className="inset-0 fixed z-50 bg-black/50" />}
+			<musicList.Root />
 		</div>
 	);
 }
 
-function Bonus() {
+function BonusView() {
 	const gBonus = useStore((s) => s.bonus);
 	const gMax = useStore((s) => s.max);
-	const [bonusStr, setBonusStr] = useState("");
-	const [maxStr, setMaxStr] = useState("");
+	const canCalc = useStore((s) => s.canCalc);
+	const [bonusStr, setBonusStr] = useState(useStore.getState().bonus?.toString() ?? "");
+	const [maxStr, setMaxStr] = useState(useStore.getState().max?.toString() ?? "");
 	const locked = useLocked();
 	const [err, setErr] = useState<string | null>(null);
 	const changed = bonusStr !== String(gBonus) || maxStr !== String(gMax);
@@ -39,11 +51,20 @@ function Bonus() {
 		if (maxN < 0 || maxN > 99) return void setErr("最大スコアは0〜99の範囲で入力してください");
 		setErr(null);
 		useStore.setState({ bonus: bonusN, max: maxN });
+		setBonusStr(bonusN.toString());
+		setMaxStr(maxN.toString());
 		setBonus();
 	};
 	return (
-		<div>
-			<NumberInput label="ボーナス" value={bonusStr} onChange={setBonusStr} min={0} max={435} disabled={locked} />
+		<Card>
+			<NumberInput
+				label="編成のイベントボーナス"
+				value={bonusStr}
+				onChange={setBonusStr}
+				min={0}
+				max={435}
+				disabled={locked}
+			/>
 			<NumberInput
 				label="最大スコア(20000で割った値、低め推奨)"
 				value={maxStr}
@@ -53,22 +74,24 @@ function Bonus() {
 				disabled={locked}
 			/>
 			{err && <div style={{ color: "red" }}>{err}</div>}
-			<button
-				type="button"
-				className="bg-blue-600 disabled:bg-gray-600 text-white"
-				disabled={!changed || !bonusStr || !maxStr || locked}
-				onClick={apply}
-			>
-				次へ
-			</button>
-		</div>
+			<Button disabled={!changed || !bonusStr || !maxStr || locked} onClick={apply}>
+				{canCalc || !changed ? "更新" : "次へ"}
+			</Button>
+		</Card>
 	);
 }
 
-function Calc() {
+function CalcView() {
 	const xg = useStore((s) => s.x);
-	const [nowStr, setNowStr] = useState("");
-	const [targetStr, setTargetStr] = useState("");
+	const [nowStr, setNowStr] = useState(useStore.getState().now?.toString() ?? "");
+	const [targetStr, setTargetStr] = useState(()=>{
+		const now=useStore.getState().now;
+		const x=useStore.getState().x;
+		if(now!=null&&x!=null){
+			return (now+x).toString();
+		}
+		return "";
+	});
 	const locked = useLocked();
 	const [err, setErr] = useState<string | null>(null);
 	const nowNum = Number.parseInt(nowStr, 10);
@@ -76,58 +99,84 @@ function Calc() {
 	const changed = targetNum - nowNum !== xg;
 	const apply = () => {
 		if (nowStr === "" || targetStr === "") return void setErr("値を入力してください");
-		if (Number.isNaN(nowNum) || Number.isNaN(targetNum)) return void setErr("数値を入力してください");
-		useStore.setState({ x: targetNum - nowNum });
+		if (Number.isNaN(nowNum) || Number.isNaN(targetNum)|| nowNum < 0 || targetNum < 0) return void setErr("正の数値を入力してください");
+		if(nowNum >= targetNum) return void setErr("目標値は現在のポイントより大きい値を入力してください");
+		if(targetNum - nowNum > 300000) return void setErr("30万ポイント差までのみ対応しています");
+		if(targetNum-nowNum<100)return void setErr("不可能です");
+		useStore.setState({ x: targetNum - nowNum,now:nowNum });
+		setNowStr(nowNum.toString());
+		setTargetStr(targetNum.toString());
 		setErr(null);
 		calc();
 	};
 	return (
-		<div>
+		<Card>
 			<NumberInput label="現在のポイント" value={nowStr} onChange={setNowStr} disabled={locked} />
 			<NumberInput label="目標値" value={targetStr} onChange={setTargetStr} disabled={locked} />
-			<button type="button" disabled={locked || !changed || !nowStr || !targetStr} onClick={apply}>
+			{err && <div style={{ color: "red" }}>{err}</div>}
+			<Button disabled={locked || !changed || !nowStr || !targetStr} onClick={apply}>
 				計算
-			</button>
-		</div>
+			</Button>
+		</Card>
 	);
 }
 
-function Result() {
+function ResultView() {
 	const result = useStore((s) => s.result);
+	const x = useStore((s) => s.x);
 	if (!result) return null;
-	return <div>{JSON.stringify(result)}</div>;
-}
-
-function NumberInput({
-	onChange,
-	value,
-	label,
-	min,
-	max,
-	disabled,
-}: {
-	value: string;
-	onChange: (e: string) => void;
-	label: string;
-	min?: number;
-	max?: number;
-	disabled?: boolean;
-}) {
 	return (
-		<div>
-			<label>
-				{label}:
-				<input
-					className="border user-invalid:border-red-600"
-					type="number"
-					required
-					value={value}
-					onChange={(e) => onChange(e.target.value)}
-					min={min}
-					max={max}
-					disabled={disabled}
-				/>
-			</label>
+		<Card>
+			<div>必要ポイント: {x}P</div>
+			<div>計算結果</div>
+			<div className="flex flex-col gap-1">
+				{result.map((r, i) => (
+					<ResultEntry key={Object.values(r).join("")} data={r} />
+				))}
+			</div>
+		</Card>
+	);
+}
+function ResultEntry({ data }: { data: Result }) {
+	return (
+		<div className="border">
+			<div>{data.bonus}%編成</div>
+			<div>
+				スコア: {scoreMin(data.score)}〜{scoreMax(data.score)}
+			</div>
+			<div>{parseLiveB(data.liveB)}炊き</div>
+			<button
+				type="button"
+				className="text-blue-600 underline cursor-pointer"
+				onClick={() => musicList.call({ p: data.music })}
+			>
+				楽曲基礎点: {data.music}
+			</button>
+			<div>{data.point}P</div>
 		</div>
 	);
 }
+
+const musicList = createCallable<{ p: number }>(({ p, call }) => {
+	const arr = MUSIC_MAP[p];
+	if (arr == null) throw new Error("無効な楽曲データ");
+	return (
+		// biome-ignore lint/a11y/noStaticElementInteractions: for close
+		<div onClick={() => call.end()} className="fixed inset-0 bg-black/50 justify-center items-center flex z-50">
+			{/* biome-ignore lint/a11y/noStaticElementInteractions: for close */}
+			<div onClick={(ev) => ev.stopPropagation()} className="bg-white p-4 flex flex-1 flex-col max-h-[90dvh] overflow-hidden w-xl max-w-dvh ">
+				<div className="text-base">基礎点が{p}の楽曲一覧</div>
+				<div className="overflow-y-auto" style={{height:"calc(100% - 1rem)"}}>
+					{arr.map((name) => (
+						<div key={name}>・{name}</div>
+					))}
+				</div>
+				<button type="button" onClick={() => call.end()} className="text-blue-600 underline cursor-pointer">閉じる</button>
+			</div>
+		</div>
+	);
+});
+
+const parseLiveB = (liveb: number) => LIVEB_REVERSE_MAP[liveb] ?? "無効なデータ";
+const scoreMin = (score: number) => score * 20000;
+const scoreMax = (score: number) => score * 20000 + 19999;
