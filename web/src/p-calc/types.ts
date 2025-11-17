@@ -10,8 +10,8 @@ export interface Exports {
 	resetDp: () => void;
 	resetAll: () => void;
 }
-export type Request<Type extends keyof WorkerMessages, Data = null> = {  data: Data; type: Type };
-export type Response<Type extends keyof WorkerMessages, Data = null> = {  data: Data; type: Type };
+export type Request<Type extends keyof WorkerMessages, Data = null> = { data: Data; type: Type };
+export type Response<Type extends keyof WorkerMessages, Data = null> = { data: Data; type: Type };
 export type Func<Type extends keyof WorkerMessages> = (
 	p: WorkerMessages[Type]["Request"],
 ) => Promise<WorkerMessages[Type]["Response"]["data"]>;
@@ -21,7 +21,19 @@ export interface WorkerMessages {
 		Response: Response<"init">;
 	};
 	setBonus: {
-		Request: Request<"setBonus", number>;
+		Request: Request<"setBonus", { bonus: number; max: number }>;
 		Response: Response<"setBonus">;
 	};
+	calc: {
+		Request: Request<"calc", number>;
+		Response: Response<"calc", Result[]>;
+	};
 }
+export interface Result {
+	point: number;
+	bonus: number;
+	music: number;
+	score: number;
+	liveB: number;
+}
+export type DataMap = Map<number, Omit<Result, "bonus">[]>;

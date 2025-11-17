@@ -1,8 +1,13 @@
 import wasmUrl from "./p-calc.wasm?url";
-import type { Exports, Func, WorkerMessages } from "./types";
+import type { DataMap, Exports, Func, Result, WorkerMessages } from "./types";
 import { fetchBonusArray } from "./util";
 
 let wasm: (WebAssembly.Instance & { exports: Exports }) | null = null;
+let data: DataMap | null = null;
+let curBonus: number | null = null;
+function assertWasm<T>(wasm: T | null): asserts wasm is T {
+	if (wasm == null) throw new Error("WASM module not initialized");
+}
 
 const init: Func<"init"> = async () => {
 	if (wasm != null) return null;
@@ -16,22 +21,62 @@ const init: Func<"init"> = async () => {
 	wasm = instance as WebAssembly.Instance & { exports: Exports };
 	return null;
 };
-const setBonus: Func<"setBonus"> = async ({ data: bonus }) => {
-	if (wasm == null) throw new Error("WASM module not initialized");
-	const startPointer=wasm.exports.setBonusArray()
-	const i32arr=new Int32Array(wasm.exports.memory.buffer,startPointer)
-	let length=0;
-	fetchBonusArray(bonus,(n)=>{
-		i32arr[length]=n;
-		length++;
-	})
+const setBonus: Func<"setBonus"> = async ({ data: { bonus, max } }) => {
+	assertWasm(wasm);
+	wasm.exports.resetAll();
+	const startPointer = wasm.exports.setBonusArray();
+	const i32arr = new Int32Array(wasm.exports.memory.buffer, startPointer);
+	let length = 0;
+	data = await fetchBonusArray(
+		bonus,
+		(n) => n <= max,
+		(n) => {
+			i32arr[length] = n;
+			length++;
+		},
+	);
+	curBonus = bonus;
 	wasm.exports.setBonusFin(length);
 	return null;
+};
+function getResultData(x: number) {
+	assertWasm(wasm);
+	wasm.exports.buildResult(x);
+	return { pointer: wasm.exports.getResultPointer(), size: wasm.exports.getResultSize() };
+}
+function readResult({ pointer, size }: { pointer: number; size: number }): Result[] {
+	assertWasm(wasm);
+	if (data == null) throw new Error("data not set");
+	if (curBonus == null) throw new Error("curBonus not set");
+	const I32Arr = new Int32Array(wasm.exports.memory.buffer, pointer, size);
+	const result:Result[]=[]
+	for (const v of I32Arr) {
+		const arr = data.get(v);
+		if (arr == null || arr.length === 0) throw new Error("invalid");
+		const r = arr.sort((a, b) => a.liveB - b.liveB)[0];
+		result.push({ ...r, bonus: curBonus });
+	}
+	return result
+}
+const calc: Func<"calc"> = async ({ data: x }) => {
+	assertWasm(wasm);
+	if (data == null) throw new Error("data not set");
+	if (curBonus == null) throw new Error("curBonus not set");
+	wasm.exports.resetDp();
+	wasm.exports.calc(x);
+	if (wasm.exports.getResult(0) < x) {
+		// simple mode
+		const data = getResultData(0);
+		return readResult(data);
+	} else {
+	}
+	throw new Error();
 };
 
 const functions = {
 	init,
 	setBonus,
+	calc,
 } satisfies { [K in keyof WorkerMessages]: Func<K> };
 
 addEventListener("message", async (ev: MessageEvent<WorkerMessages[keyof WorkerMessages]["Request"]>) => {
@@ -40,6 +85,7 @@ addEventListener("message", async (ev: MessageEvent<WorkerMessages[keyof WorkerM
 	postMessage({
 		type: ev.data.type,
 		data: res,
+		// @ts-expect-error 型推論が効かない
 	} satisfies WorkerMessages[typeof ev.data.type]["Response"]);
 });
 

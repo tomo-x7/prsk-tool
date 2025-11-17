@@ -9,7 +9,7 @@ interface State {
 	bonus: number | null;
 	error: Error | null;
 	result: null | number[];
-	lock:boolean
+	lock: boolean;
 }
 interface Action {
 	loadfin: () => void;
@@ -19,11 +19,9 @@ export const store = create<State & Action>()((set) => ({
 	error: null,
 	initLoaded: false,
 	loadfin: () => set({ initLoaded: true }),
-	result: null,lock:false,
+	result: null,
+	lock: false,
 }));
-
-
-
 
 // 最下部で呼んでる
 async function init() {
@@ -37,21 +35,21 @@ const worker = new PCalcWorker();
 function sendWorker<T extends keyof WorkerMessages>(
 	key: T,
 	data: WorkerMessages[T]["Request"]["data"],
-): Promise<WorkerMessages[T]["Response"]["data"]>|undefined {
-	if(locked)return void store.setState({error:new Error("worker locked")})
-	locked=true;
+): Promise<WorkerMessages[T]["Response"]["data"]> | undefined {
+	if (locked) return void store.setState({ error: new Error("worker locked") });
+	locked = true;
 	return new Promise((resolve) => {
 		const listner = (evt: MessageEvent<WorkerMessages[T]["Response"]>) => {
 			worker.removeEventListener("message", listner);
-			locked=false;
+			locked = false;
 			resolve(evt.data.data);
 		};
 		worker.addEventListener("message", listner);
-		worker.postMessage({ type: key,  data });
+		worker.postMessage({ type: key, data });
 	});
 }
 worker.addEventListener("error", (e) => {
-	store.setState({ error: e.error instanceof Error?e.error:new Error(e.error) });
+	store.setState({ error: e.error instanceof Error ? e.error : new Error(e.error) });
 });
 
 init();
