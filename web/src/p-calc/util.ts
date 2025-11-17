@@ -1,13 +1,10 @@
-export async function calc(p: number) {}
-
-async function fetchData() {
-	const body = await fetch("http://prsk-tool.tomo-x.win/p-calc/index.csv").then((r) => r.body);
+export async function fetchBonusArray(bonus:number,write:(n:number)=>void){
+    const body = await fetch(`http://prsk-tool.tomo-x.win/p-calc/b/${bonus}.csv`).then((r) => r.body);
 	if (body == null) return null;
 	const stream = body.pipeThrough(new TextDecoderStream());
 	const reader = stream.getReader();
 	let cur = "";
 	let stat: "new" | "skip" = "new";
-	const result: number[] = [];
 	while (true) {
 		const { done, value } = await reader.read();
 		if (done) break;
@@ -17,7 +14,7 @@ async function fetchData() {
 			} else if (stat === "skip") {
 			} else if (value[i] === ",") {
 				const num = Number.parseInt(cur, 10);
-				if (!Number.isNaN(num)) result.push(num);
+				if (!Number.isNaN(num)) write(num);
 				cur = "";
 				stat = "skip";
 			} else {
@@ -27,8 +24,6 @@ async function fetchData() {
 	}
 	if (stat === "new" && cur) {
 		const num = Number.parseInt(cur, 10);
-		if (!Number.isNaN(num)) result.push(num);
+		if (!Number.isNaN(num)) write(num);
 	}
-	return result;
 }
-fetchData().then((d) => console.log(d?.length));

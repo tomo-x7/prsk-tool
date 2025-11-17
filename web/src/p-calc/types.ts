@@ -10,8 +10,8 @@ export interface Exports {
 	resetDp: () => void;
 	resetAll: () => void;
 }
-export type Request<Type extends keyof WorkerMessages, Data = null> = { id: number; data: Data; type: Type };
-export type Response<Type extends keyof WorkerMessages, Data = null> = { id: number; data: Data; type: Type };
+export type Request<Type extends keyof WorkerMessages, Data = null> = {  data: Data; type: Type };
+export type Response<Type extends keyof WorkerMessages, Data = null> = {  data: Data; type: Type };
 export type Func<Type extends keyof WorkerMessages> = (
 	p: WorkerMessages[Type]["Request"],
 ) => Promise<WorkerMessages[Type]["Response"]["data"]>;
