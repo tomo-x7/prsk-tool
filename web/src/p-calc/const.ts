@@ -1,5 +1,5 @@
 export const LIVEB_REVERSE_MAP = {
-	0: 0,
+	1: 0,
 	5: 1,
 	10: 2,
 	15: 3,
