@@ -84,11 +84,11 @@ function BonusView() {
 function CalcView() {
 	const xg = useStore((s) => s.x);
 	const [nowStr, setNowStr] = useState(useStore.getState().now?.toString() ?? "");
-	const [targetStr, setTargetStr] = useState(()=>{
-		const now=useStore.getState().now;
-		const x=useStore.getState().x;
-		if(now!=null&&x!=null){
-			return (now+x).toString();
+	const [targetStr, setTargetStr] = useState(() => {
+		const now = useStore.getState().now;
+		const x = useStore.getState().x;
+		if (now != null && x != null) {
+			return (now + x).toString();
 		}
 		return "";
 	});
@@ -99,11 +99,12 @@ function CalcView() {
 	const changed = targetNum - nowNum !== xg;
 	const apply = () => {
 		if (nowStr === "" || targetStr === "") return void setErr("値を入力してください");
-		if (Number.isNaN(nowNum) || Number.isNaN(targetNum)|| nowNum < 0 || targetNum < 0) return void setErr("正の数値を入力してください");
-		if(nowNum >= targetNum) return void setErr("目標値は現在のポイントより大きい値を入力してください");
-		if(targetNum - nowNum > 300000) return void setErr("30万ポイント差までのみ対応しています");
-		if(targetNum-nowNum<100)return void setErr("不可能です");
-		useStore.setState({ x: targetNum - nowNum,now:nowNum });
+		if (Number.isNaN(nowNum) || Number.isNaN(targetNum) || nowNum < 0 || targetNum < 0)
+			return void setErr("正の数値を入力してください");
+		if (nowNum >= targetNum) return void setErr("目標値は現在のポイントより大きい値を入力してください");
+		if (targetNum - nowNum > 300000) return void setErr("30万ポイント差までのみ対応しています");
+		if (targetNum - nowNum < 100) return void setErr("不可能です");
+		useStore.setState({ x: targetNum - nowNum, now: nowNum });
 		setNowStr(nowNum.toString());
 		setTargetStr(targetNum.toString());
 		setErr(null);
@@ -164,14 +165,19 @@ const musicList = createCallable<{ p: number }>(({ p, call }) => {
 		// biome-ignore lint/a11y/noStaticElementInteractions: for close
 		<div onClick={() => call.end()} className="fixed inset-0 bg-black/50 justify-center items-center flex z-50">
 			{/* biome-ignore lint/a11y/noStaticElementInteractions: for close */}
-			<div onClick={(ev) => ev.stopPropagation()} className="bg-white p-4 flex flex-1 flex-col max-h-[90dvh] overflow-hidden w-xl max-w-dvh ">
+			<div
+				onClick={(ev) => ev.stopPropagation()}
+				className="bg-white p-4 flex flex-1 flex-col max-h-[90dvh] overflow-hidden w-xl max-w-dvh "
+			>
 				<div className="text-base">基礎点が{p}の楽曲一覧</div>
-				<div className="overflow-y-auto" style={{height:"calc(100% - 1rem)"}}>
+				<div className="overflow-y-auto" style={{ height: "calc(100% - 1rem)" }}>
 					{arr.map((name) => (
 						<div key={name}>・{name}</div>
 					))}
 				</div>
-				<button type="button" onClick={() => call.end()} className="text-blue-600 underline cursor-pointer">閉じる</button>
+				<button type="button" onClick={() => call.end()} className="text-blue-600 underline cursor-pointer">
+					閉じる
+				</button>
 			</div>
 		</div>
 	);
