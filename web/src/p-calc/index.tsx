@@ -65,17 +65,9 @@ function BonusView() {
 				max={435}
 				disabled={locked}
 			/>
-			{/* <NumberInput
-				label="最大スコア(20000で割った値、低め推奨)"
-				value={maxStr}
-				onChange={setMaxStr}
-				min={0}
-				max={99}
-				disabled={locked}
-			/> */}
 			<label>
 				総合力目安
-				<select value={maxStr} onChange={(ev)=>setMaxStr(ev.currentTarget.value)}>
+				<select className="border" value={maxStr} onChange={(ev)=>setMaxStr(ev.currentTarget.value)}>
 					<option value={20} label="10万〜" />
 					<option value={30} label="15万〜" />
 					<option value={40} label="20万〜" />
