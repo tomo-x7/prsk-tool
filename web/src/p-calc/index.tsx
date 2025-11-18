@@ -65,14 +65,26 @@ function BonusView() {
 				max={435}
 				disabled={locked}
 			/>
-			<NumberInput
+			{/* <NumberInput
 				label="最大スコア(20000で割った値、低め推奨)"
 				value={maxStr}
 				onChange={setMaxStr}
 				min={0}
 				max={99}
 				disabled={locked}
-			/>
+			/> */}
+			<label>
+				総合力目安
+				<select value={maxStr} onChange={(ev)=>setMaxStr(ev.currentTarget.value)}>
+					<option value={20} label="10万〜" />
+					<option value={30} label="15万〜" />
+					<option value={40} label="20万〜" />
+					<option value={50} label="25万〜" />
+					<option value={60} label="30万〜" />
+					<option value={75} label="35万〜" />
+					<option value={90} label="40万〜" />
+				</select>
+			</label>
 			{err && <div style={{ color: "red" }}>{err}</div>}
 			<Button disabled={!changed || !bonusStr || !maxStr || locked} onClick={apply}>
 				{canCalc || !changed ? "更新" : "次へ"}
