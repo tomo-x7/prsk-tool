@@ -101,7 +101,7 @@ function BonusView() {
 
 function CalcView() {
 	const xg = useStore((s) => s.x);
-	const minPoint=useStore(s=>s.minPoint)
+	const minPoint = useStore((s) => s.minPoint);
 	const [nowStr, setNowStr] = useState(useStore.getState().now?.toString() ?? "");
 	const [targetStr, setTargetStr] = useState(() => {
 		const now = useStore.getState().now;
@@ -115,14 +115,15 @@ function CalcView() {
 	const [err, setErr] = useState<string | null>(null);
 	const nowNum = Number.parseInt(nowStr, 10);
 	const targetNum = Number.parseInt(targetStr, 10);
-	const changed = targetNum - nowNum !== xg;
+	const result=useStore(s=>s.result)
+	const changed = targetNum - nowNum !== xg || result==null;
 	const apply = () => {
 		if (nowStr === "" || targetStr === "") return void setErr("値を入力してください");
 		if (Number.isNaN(nowNum) || Number.isNaN(targetNum) || nowNum < 0 || targetNum < 0)
 			return void setErr("正の数値を入力してください");
 		if (nowNum >= targetNum) return void setErr("目標値は現在のポイントより大きい値を入力してください");
 		if (targetNum - nowNum > 300000) return void setErr("30万ポイント差までのみ対応しています");
-		if (targetNum - nowNum < (minPoint??100)) return void setErr(`現在の編成では${minPoint}以上のみ可能です`);
+		if (targetNum - nowNum < (minPoint ?? 100)) return void setErr(`現在の編成では${minPoint}以上のみ可能です`);
 		useStore.setState({ x: targetNum - nowNum, now: nowNum });
 		setNowStr(nowNum.toString());
 		setTargetStr(targetNum.toString());
@@ -132,7 +133,7 @@ function CalcView() {
 	return (
 		<Card>
 			<NumberInput label="現在のポイント" value={nowStr} onChange={setNowStr} disabled={locked} />
-			<NumberInput label="目標値" value={targetStr} onChange={setTargetStr} disabled={locked}  />
+			<NumberInput label="目標値" value={targetStr} onChange={setTargetStr} disabled={locked} />
 			{err && <div style={{ color: "red" }}>{err}</div>}
 			<Button disabled={locked || !changed || !nowStr || !targetStr} onClick={apply}>
 				計算
@@ -144,40 +145,76 @@ function CalcView() {
 function ResultView() {
 	const result = useStore((s) => s.result);
 	const x = useStore((s) => s.x);
+	const prev = useStore((s) => s.now);
+	const [forKey, setForKey] = useState(0);
 	if (!result) return null;
-	if(result===-1){
-		return <Card>
-			今の編成だけでは作れないポイントです。今後別編成の使用にも対応予定
-		</Card>
+	if (result === -1) {
+		return <Card>今の編成だけでは作れないポイントです。今後別編成の使用にも対応予定</Card>;
 	}
 	return (
 		<Card>
 			<div>必要ポイント: {x}P</div>
-			<div>計算結果</div>
+			<div className="flex justify-between">
+				<div>計算結果</div>
+				<button className="text-blue-600 underline" type="button" onClick={() => setForKey((s) => s + 1)}>
+					すべて再表示
+				</button>
+			</div>
 			<div className="flex flex-col gap-1">
-				{result.map((r, i) => (
-					<ResultEntry key={Object.values(r).join("")} data={r} />
+				{mapResult(result, prev ?? 0).map(({ data, prev }, i) => (
+					<ResultEntry key={Object.values(data).join("") + prev + forKey} data={data} prev={prev} />
 				))}
 			</div>
 		</Card>
 	);
 }
-function ResultEntry({ data }: { data: Result }) {
+function mapResult(input: Result[], initPrev: number) {
+	const res: { data: Result; prev: number }[] = [];
+	let prev = initPrev;
+	for (const data of input) {
+		res.push({ data, prev });
+		prev += data.point;
+	}
+	return res;
+}
+function ResultEntry({ data, prev }: { data: Result; prev: number }) {
+	const [done, setDone] = useState(false);
+	if (done) return null;
 	return (
-		<div className="border">
-			<div>{data.bonus}%編成</div>
+		<div className="border flex gap-5">
 			<div>
-				スコア: {scoreMin(data.score)}〜{scoreMax(data.score)}
+				<div>
+					{data.bonus}%編成・{parseLiveB(data.liveB)}炊き
+				</div>
+				<div>
+					スコア: {scoreMin(data.score)}〜{scoreMax(data.score)}
+				</div>
+				<button
+					type="button"
+					className="text-blue-600 underline cursor-pointer"
+					onClick={() => musicList.call({ p: data.music })}
+				>
+					楽曲基礎点: {data.music}
+				</button>
 			</div>
-			<div>{parseLiveB(data.liveB)}炊き</div>
-			<button
-				type="button"
-				className="text-blue-600 underline cursor-pointer"
-				onClick={() => musicList.call({ p: data.music })}
-			>
-				楽曲基礎点: {data.music}
-			</button>
-			<div>{data.point}P</div>
+			<div>
+				<div>{data.point}ポイント</div>
+				<div>
+					{prev}→{prev + data.point}
+				</div>
+			</div>
+			<div>
+				<button type="button" onClick={() => setDone(true)}>
+					<svg x="0px" y="0px" width={32} height={32} viewBox="0 0 512 512">
+						<g>
+							<polygon fill="#000"
+								points="440.469,73.413 218.357,295.525 71.531,148.709 0,220.229 146.826,367.055 218.357,438.587 
+		289.878,367.055 512,144.945 	"
+							/>
+						</g>
+					</svg>
+				</button>
+			</div>
 		</div>
 	);
 }

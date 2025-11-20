@@ -22,11 +22,11 @@ export interface WorkerMessages {
 	};
 	setBonus: {
 		Request: Request<"setBonus", { bonus: number; max: number }>;
-		Response: Response<"setBonus",{min:number}>;
+		Response: Response<"setBonus", { min: number }>;
 	};
 	calc: {
 		Request: Request<"calc", number>;
-		Response: Response<"calc", Result[]|-1>;
+		Response: Response<"calc", Result[] | -1>;
 	};
 }
 export interface Result {

@@ -8,11 +8,11 @@ interface State {
 	error: Error | null;
 	bonus: number | null;
 	max: number | null;
-	minPoint:number|null;
+	minPoint: number | null;
 	canCalc: boolean;
 	now: number | null;
 	x: number | null;
-	result: null | Result[]|-1;
+	result: null | Result[] | -1;
 	lock: boolean;
 }
 export const useStore = create<State>()(
@@ -20,7 +20,7 @@ export const useStore = create<State>()(
 		error: null,
 		bonus: null,
 		max: null,
-		minPoint:null,
+		minPoint: null,
 		canCalc: false,
 		now: null,
 		x: null,
@@ -47,8 +47,8 @@ export async function setBonus() {
 	const p = sendWorker("setBonus", { bonus, max });
 	if (p == null) return void unlock();
 	try {
-		const {min}=await p;
-		useStore.setState({ canCalc: true,minPoint:min });
+		const { min } = await p;
+		useStore.setState({ canCalc: true, minPoint: min });
 	} finally {
 		unlock();
 	}

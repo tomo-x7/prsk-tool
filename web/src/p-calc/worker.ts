@@ -27,7 +27,7 @@ const setBonus: Func<"setBonus"> = async ({ data: { bonus, max } }) => {
 	const startPointer = wasm.exports.setBonusArray();
 	const i32arr = new Int32Array(wasm.exports.memory.buffer, startPointer);
 	let length = 0;
-	const {data,min} = await fetchBonusArray(
+	const { data, min } = await fetchBonusArray(
 		bonus,
 		(n) => n <= max,
 		(n) => {
@@ -38,7 +38,7 @@ const setBonus: Func<"setBonus"> = async ({ data: { bonus, max } }) => {
 	globalData = data;
 	curBonus = bonus;
 	wasm.exports.setBonusFin(length);
-	return {min};
+	return { min };
 };
 function getResultData(x: number) {
 	assertWasm(wasm);

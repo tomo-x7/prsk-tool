@@ -20,7 +20,7 @@ export function NumberInput({
 			<label className="flex gap-2">
 				<div>{label}:</div>
 				<input
-					className="border invalid:border-red-600 invalid:outline-red-600 min-w-20 focus:outline-2 outline-black"
+					className="flex-0 border invalid:border-red-600 invalid:outline-red-600 min-w-16 focus:outline-2 outline-black"
 					type="number"
 					required
 					value={value}
