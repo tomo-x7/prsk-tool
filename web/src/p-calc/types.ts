@@ -21,7 +21,7 @@ export interface WorkerMessages {
 		Response: Response<"init">;
 	};
 	setBonus: {
-		Request: Request<"setBonus", { bonus: number; max: number }>;
+		Request: Request<"setBonus", { bonus: number; max: number,noSixPlus:boolean }>;
 		Response: Response<"setBonus", { min: number }>;
 	};
 	calc: {

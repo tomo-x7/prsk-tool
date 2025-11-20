@@ -36,12 +36,14 @@ export default function PCalc() {
 function BonusView() {
 	const gBonus = useStore((s) => s.bonus);
 	const gMax = useStore((s) => s.max);
+	const gNoSix=useStore(s=>s.noSixPlus)
 	const canCalc = useStore((s) => s.canCalc);
 	const [bonusStr, setBonusStr] = useState(useStore.getState().bonus?.toString() ?? "");
 	const [maxN, setMaxN] = useState(useStore.getState().max ?? 20);
+	const [noSix,setNoSix]=useState(useStore.getState().noSixPlus);
 	const locked = useLocked();
 	const [err, setErr] = useState<string | null>(null);
-	const changed = bonusStr !== String(gBonus) || maxN !== gMax;
+	const changed = bonusStr !== String(gBonus) || maxN !== gMax||noSix!==gNoSix;
 	const apply = () => {
 		if (bonusStr === "") return void setErr("値を入力してください");
 		const bonusN = Number.parseInt(bonusStr, 10);
@@ -49,7 +51,7 @@ function BonusView() {
 		if (bonusN < 0 || bonusN > 435) return void setErr("ボーナスは0〜435の範囲で入力してください");
 		if (maxN < 0 || maxN > 99) return void setErr("最大スコアは0〜99の範囲で入力してください");
 		setErr(null);
-		useStore.setState({ bonus: bonusN, max: maxN });
+		useStore.setState({ bonus: bonusN, max: maxN,noSixPlus:noSix });
 		setBonusStr(bonusN.toString());
 		setBonus();
 	};
@@ -90,6 +92,10 @@ function BonusView() {
 						</svg>
 					</div>
 				</div>
+			</label>
+			<label>
+				<input type="checkbox" checked={noSix} onChange={e=>setNoSix(e.target.checked)} />
+				6炊き以上を使わない
 			</label>
 			{err && <div style={{ color: "red" }}>{err}</div>}
 			<Button disabled={!changed || !bonusStr || !maxN || locked} onClick={apply}>

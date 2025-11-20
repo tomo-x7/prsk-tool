@@ -8,6 +8,7 @@ interface State {
 	error: Error | null;
 	bonus: number | null;
 	max: number | null;
+	noSixPlus:boolean;
 	minPoint: number | null;
 	canCalc: boolean;
 	now: number | null;
@@ -19,7 +20,8 @@ export const useStore = create<State>()(
 	subscribeWithSelector((set) => ({
 		error: null,
 		bonus: null,
-		max: null,
+		max: null,noSixPlus:false,
+
 		minPoint: null,
 		canCalc: false,
 		now: null,
@@ -40,11 +42,11 @@ async function init() {
 }
 
 export async function setBonus() {
-	const { bonus, max } = useStore.getState();
+	const { bonus, max,noSixPlus } = useStore.getState();
 	if (bonus == null || max == null) return void error(new Error("bonus or max is null"));
 	lock();
 	useStore.setState({ canCalc: false, result: null });
-	const p = sendWorker("setBonus", { bonus, max });
+	const p = sendWorker("setBonus", { bonus, max,noSixPlus });
 	if (p == null) return void unlock();
 	try {
 		const { min } = await p;
