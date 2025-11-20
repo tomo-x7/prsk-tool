@@ -145,6 +145,11 @@ function ResultView() {
 	const result = useStore((s) => s.result);
 	const x = useStore((s) => s.x);
 	if (!result) return null;
+	if(result===-1){
+		return <Card>
+			今の編成だけでは作れないポイントです。今後別編成の使用にも対応予定
+		</Card>
+	}
 	return (
 		<Card>
 			<div>必要ポイント: {x}P</div>

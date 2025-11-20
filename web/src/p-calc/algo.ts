@@ -12,7 +12,7 @@ interface State {
 	canCalc: boolean;
 	now: number | null;
 	x: number | null;
-	result: null | Result[];
+	result: null | Result[]|-1;
 	lock: boolean;
 }
 export const useStore = create<State>()(
@@ -64,7 +64,6 @@ export async function calc() {
 			useStore.setState({ result: res });
 		})
 		.finally(() => unlock());
-	unlock();
 }
 
 // Worker通信

@@ -26,7 +26,7 @@ export interface WorkerMessages {
 	};
 	calc: {
 		Request: Request<"calc", number>;
-		Response: Response<"calc", Result[]>;
+		Response: Response<"calc", Result[]|-1>;
 	};
 }
 export interface Result {

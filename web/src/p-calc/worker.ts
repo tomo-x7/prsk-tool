@@ -71,7 +71,7 @@ const calc: Func<"calc"> = async ({ data: x }) => {
 		const data = getResultData(0);
 		return readResult(data);
 	} else {
-		throw new Error("ベータ版のため未対応なケースです。再度実行するにはリロードしてください。");
+		return -1;
 	}
 };
 
