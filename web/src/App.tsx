@@ -56,7 +56,9 @@ function Top() {
 	return (
 		<div>
 			<div>ベータ版なう</div>
-			<Link to="/p-calc">ポイント調整ツール</Link>
+			<Link className="text-blue-600 underline" to="/p-calc">
+				ポイント調整ツール
+			</Link>
 		</div>
 	);
 }

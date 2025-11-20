@@ -38,21 +38,19 @@ function BonusView() {
 	const gMax = useStore((s) => s.max);
 	const canCalc = useStore((s) => s.canCalc);
 	const [bonusStr, setBonusStr] = useState(useStore.getState().bonus?.toString() ?? "");
-	const [maxStr, setMaxStr] = useState(useStore.getState().max?.toString() ?? "");
+	const [maxN, setMaxN] = useState(useStore.getState().max ?? 20);
 	const locked = useLocked();
 	const [err, setErr] = useState<string | null>(null);
-	const changed = bonusStr !== String(gBonus) || maxStr !== String(gMax);
+	const changed = bonusStr !== String(gBonus) || maxN !== gMax;
 	const apply = () => {
-		if (bonusStr === "" || maxStr === "") return void setErr("値を入力してください");
+		if (bonusStr === "") return void setErr("値を入力してください");
 		const bonusN = Number.parseInt(bonusStr, 10);
-		const maxN = Number.parseInt(maxStr, 10);
 		if (Number.isNaN(bonusN) || Number.isNaN(maxN)) return void setErr("数値を入力してください");
 		if (bonusN < 0 || bonusN > 435) return void setErr("ボーナスは0〜435の範囲で入力してください");
 		if (maxN < 0 || maxN > 99) return void setErr("最大スコアは0〜99の範囲で入力してください");
 		setErr(null);
 		useStore.setState({ bonus: bonusN, max: maxN });
 		setBonusStr(bonusN.toString());
-		setMaxStr(maxN.toString());
 		setBonus();
 	};
 	return (
@@ -65,20 +63,36 @@ function BonusView() {
 				max={435}
 				disabled={locked}
 			/>
-			<label>
-				総合力目安
-				<select className="border" value={maxStr} onChange={(ev)=>setMaxStr(ev.currentTarget.value)}>
-					<option value={20} label="10万〜" />
-					<option value={30} label="15万〜" />
-					<option value={40} label="20万〜" />
-					<option value={50} label="25万〜" />
-					<option value={60} label="30万〜" />
-					<option value={75} label="35万〜" />
-					<option value={90} label="40万〜" />
-				</select>
+			<label className="flex gap-2">
+				総合力目安:
+				<div className="relative w-20">
+					<select
+						className="border w-full focus:outline-2 outline-black appearance-none"
+						value={maxN}
+						onChange={(ev) => setMaxN(Number.parseInt(ev.currentTarget.value, 10))}
+					>
+						<option value={20} label="10万〜" />
+						<option value={30} label="15万〜" />
+						<option value={40} label="20万〜" />
+						<option value={50} label="25万〜" />
+						<option value={60} label="30万〜" />
+						<option value={70} label="35万〜" />
+						<option value={80} label="40万〜" />
+					</select>
+					<div className="absolute pointer-events-none right-1 inset-y-0 flex items-center">
+						<svg x="0px" y="0px" viewBox="0 0 512 512" width={16} height={16}>
+							<g>
+								<polygon
+									fill="#000"
+									points="440.189,92.085 256.019,276.255 71.83,92.085 0,163.915 256.019,419.915 512,163.915 	"
+								/>
+							</g>
+						</svg>
+					</div>
+				</div>
 			</label>
 			{err && <div style={{ color: "red" }}>{err}</div>}
-			<Button disabled={!changed || !bonusStr || !maxStr || locked} onClick={apply}>
+			<Button disabled={!changed || !bonusStr || !maxN || locked} onClick={apply}>
 				{canCalc || !changed ? "更新" : "次へ"}
 			</Button>
 		</Card>
@@ -87,6 +101,7 @@ function BonusView() {
 
 function CalcView() {
 	const xg = useStore((s) => s.x);
+	const minPoint=useStore(s=>s.minPoint)
 	const [nowStr, setNowStr] = useState(useStore.getState().now?.toString() ?? "");
 	const [targetStr, setTargetStr] = useState(() => {
 		const now = useStore.getState().now;
@@ -107,7 +122,7 @@ function CalcView() {
 			return void setErr("正の数値を入力してください");
 		if (nowNum >= targetNum) return void setErr("目標値は現在のポイントより大きい値を入力してください");
 		if (targetNum - nowNum > 300000) return void setErr("30万ポイント差までのみ対応しています");
-		if (targetNum - nowNum < 100) return void setErr("不可能です");
+		if (targetNum - nowNum < (minPoint??100)) return void setErr(`現在の編成では${minPoint}以上のみ可能です`);
 		useStore.setState({ x: targetNum - nowNum, now: nowNum });
 		setNowStr(nowNum.toString());
 		setTargetStr(targetNum.toString());
@@ -117,7 +132,7 @@ function CalcView() {
 	return (
 		<Card>
 			<NumberInput label="現在のポイント" value={nowStr} onChange={setNowStr} disabled={locked} />
-			<NumberInput label="目標値" value={targetStr} onChange={setTargetStr} disabled={locked} />
+			<NumberInput label="目標値" value={targetStr} onChange={setTargetStr} disabled={locked}  />
 			{err && <div style={{ color: "red" }}>{err}</div>}
 			<Button disabled={locked || !changed || !nowStr || !targetStr} onClick={apply}>
 				計算

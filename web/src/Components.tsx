@@ -17,10 +17,10 @@ export function NumberInput({
 }) {
 	return (
 		<div>
-			<label>
-				{label}:
+			<label className="flex gap-2">
+				<div>{label}:</div>
 				<input
-					className="border invalid:border-red-600"
+					className="border invalid:border-red-600 invalid:outline-red-600 min-w-20 focus:outline-2 outline-black"
 					type="number"
 					required
 					value={value}
@@ -47,7 +47,7 @@ export function Button({
 	return (
 		<button
 			type="button"
-			className={`bg-blue-600 disabled:bg-gray-600 text-white ${className ?? ""}`}
+			className={`block px-4 py-1 rounded bg-blue-600 disabled:bg-gray-600 text-white ${className ?? ""}`}
 			onClick={onClick}
 			disabled={disabled}
 		>

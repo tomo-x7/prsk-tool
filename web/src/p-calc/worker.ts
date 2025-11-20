@@ -3,7 +3,7 @@ import type { DataMap, Exports, Func, Result, WorkerMessages } from "./types";
 import { fetchBonusArray } from "./util";
 
 let wasm: (WebAssembly.Instance & { exports: Exports }) | null = null;
-let data: DataMap | null = null;
+let globalData: DataMap | null = null;
 let curBonus: number | null = null;
 function assertWasm<T>(wasm: T | null): asserts wasm is T {
 	if (wasm == null) throw new Error("WASM module not initialized");
@@ -27,7 +27,7 @@ const setBonus: Func<"setBonus"> = async ({ data: { bonus, max } }) => {
 	const startPointer = wasm.exports.setBonusArray();
 	const i32arr = new Int32Array(wasm.exports.memory.buffer, startPointer);
 	let length = 0;
-	data = await fetchBonusArray(
+	const {data,min} = await fetchBonusArray(
 		bonus,
 		(n) => n <= max,
 		(n) => {
@@ -35,9 +35,10 @@ const setBonus: Func<"setBonus"> = async ({ data: { bonus, max } }) => {
 			length++;
 		},
 	);
+	globalData = data;
 	curBonus = bonus;
 	wasm.exports.setBonusFin(length);
-	return null;
+	return {min};
 };
 function getResultData(x: number) {
 	assertWasm(wasm);
@@ -46,13 +47,13 @@ function getResultData(x: number) {
 }
 function readResult({ pointer, size }: { pointer: number; size: number }): Result[] {
 	assertWasm(wasm);
-	if (data == null) throw new Error("data not set");
+	if (globalData == null) throw new Error("data not set");
 	if (curBonus == null) throw new Error("curBonus not set");
 	const I32Arr = new Int32Array(wasm.exports.memory.buffer, pointer, size);
 	const result: Result[] = [];
 	console.log(I32Arr);
 	for (const v of I32Arr) {
-		const arr = data.get(v);
+		const arr = globalData.get(v);
 		if (arr == null || arr.length === 0) throw new Error("invalid");
 		const r = arr.sort((a, b) => a.liveB - b.liveB)[0];
 		result.push({ ...r, bonus: curBonus, point: v });
@@ -61,7 +62,7 @@ function readResult({ pointer, size }: { pointer: number; size: number }): Resul
 }
 const calc: Func<"calc"> = async ({ data: x }) => {
 	assertWasm(wasm);
-	if (data == null) throw new Error("data not set");
+	if (globalData == null) throw new Error("data not set");
 	if (curBonus == null) throw new Error("curBonus not set");
 	wasm.exports.resetDp();
 	wasm.exports.calc(x);

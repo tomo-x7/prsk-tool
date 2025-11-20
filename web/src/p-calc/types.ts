@@ -22,7 +22,7 @@ export interface WorkerMessages {
 	};
 	setBonus: {
 		Request: Request<"setBonus", { bonus: number; max: number }>;
-		Response: Response<"setBonus">;
+		Response: Response<"setBonus",{min:number}>;
 	};
 	calc: {
 		Request: Request<"calc", number>;
