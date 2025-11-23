@@ -51,7 +51,7 @@ function Layout() {
 				</div>
 			</header>
 			<div>
-				<Suspense fallback={<Loading />}>
+				<Suspense fallback={"Layout suspense"}>
 					<Outlet />
 				</Suspense>
 			</div>
@@ -85,7 +85,9 @@ function Top() {
 export function App() {
 	return (
 		<MetaProvider>
-			<RouterProvider router={router} />
+			<Suspense fallback={"App suspense"}>
+				<RouterProvider router={router} />
+			</Suspense>
 		</MetaProvider>
 	);
 }
