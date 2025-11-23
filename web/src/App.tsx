@@ -1,37 +1,27 @@
 import { lazy, type ReactNode, Suspense } from "react";
 import { FaBluesky, FaGithub } from "react-icons/fa6";
 import { createBrowserRouter, createRoutesFromChildren, Link, Outlet, Route, RouterProvider } from "react-router-dom";
-import { MetaProvider, useSetTitle, useMeta, useSetDescription } from "./util.tsx";
 import { ScaleLoader } from "react-spinners";
+import { MetaProvider, useMeta, useSetDescription, useSetTitle } from "./util.tsx";
 
 const to = () => new Promise((resolve) => setTimeout(resolve, 3000));
-const PCalc = lazy(
-	// () => to().then
-	(() => import("./p-calc/index.tsx")));
+const PCalcInner = lazy(() => import("./p-calc"));
+
+function PCalc() {
+	useSetTitle("ポイント調整ツールβ");
+	useSetDescription("イベント編成のままでポイント調整が簡単にできるツール。");
+	return (
+		<Suspense fallback={<Loading />}>
+			<PCalcInner />
+		</Suspense>
+	);
+}
 
 const router = createBrowserRouter(
 	createRoutesFromChildren(
 		<Route element={<Layout />}>
-			<Route
-				path="p-calc"
-				element={
-					<S
-						e={<PCalc />}
-						t="ポイント調整ツールβ"
-						d="イベント編成のままでポイント調整が簡単にできるツール。"
-					/>
-				}
-			/>
-			<Route
-				index
-				element={
-					<S
-						e={<Top />}
-						t="プロセカツール集"
-						d="プロセカ関係の便利なツールとか。今はポイント調整ツールがあるよ。"
-					/>
-				}
-			/>
+			<Route path="p-calc" Component={PCalc} />
+			<Route index element={<Top />} />
 			<Route path="*" element={"Not Found"} />
 		</Route>,
 	),
@@ -48,12 +38,18 @@ function Layout() {
 					<a href="https://github.com/tomo-x7/prsk-tool" target="_blank" rel="noopener noreferrer">
 						<FaGithub size={26} />
 					</a>
+
+					<a
+						href="https://bsky.app/profile/did:plc:qcwvyds5tixmcwkwrg3hxgxd"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						<FaBluesky />
+					</a>
 				</div>
 			</header>
 			<div>
-				<Suspense fallback={"Layout suspense"}>
-					<Outlet />
-				</Suspense>
+				<Outlet />
 			</div>
 		</div>
 	);
@@ -62,12 +58,18 @@ function Layout() {
 function S({ e, t, d }: { e: ReactNode; t: string; d: string }) {
 	useSetTitle(t);
 	useSetDescription(d);
-	return <Suspense fallback={<Loading />}>{e}</Suspense>;
+	return <>{e}</>;
 }
 function Loading() {
-	return <div><ScaleLoader /></div>;
+	return (
+		<div>
+			<ScaleLoader />
+		</div>
+	);
 }
 function Top() {
+	useSetTitle("プロセカツール集");
+	useSetDescription("プロセカ関係の便利なツールとか。今はポイント調整ツールがあるよ。");
 	return (
 		<div>
 			<div>
@@ -85,9 +87,7 @@ function Top() {
 export function App() {
 	return (
 		<MetaProvider>
-			<Suspense fallback={"App suspense"}>
-				<RouterProvider router={router} />
-			</Suspense>
+			<RouterProvider router={router} />
 		</MetaProvider>
 	);
 }
