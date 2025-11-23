@@ -51,7 +51,9 @@ function Layout() {
 				</div>
 			</header>
 			<div>
-				<Outlet />
+				<Suspense fallback={<Loading />}>
+					<Outlet />
+				</Suspense>
 			</div>
 		</div>
 	);
