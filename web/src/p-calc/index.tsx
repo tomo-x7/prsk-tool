@@ -1,4 +1,4 @@
-import { use, useState } from "react";
+import { type CSSProperties, use, useState } from "react";
 import { createCallable } from "react-call";
 import { Button, Card, NumberInput } from "../Components";
 import { calc, initPromise, setBonus, useLocked, useStore } from "./algo";
@@ -36,14 +36,14 @@ export default function PCalc() {
 function BonusView() {
 	const gBonus = useStore((s) => s.bonus);
 	const gMax = useStore((s) => s.max);
-	const gNoSix=useStore(s=>s.noSixPlus)
+	const gNoSix = useStore((s) => s.noSixPlus);
 	const canCalc = useStore((s) => s.canCalc);
 	const [bonusStr, setBonusStr] = useState(useStore.getState().bonus?.toString() ?? "");
-	const [maxN, setMaxN] = useState(useStore.getState().max ?? 20);
-	const [noSix,setNoSix]=useState(useStore.getState().noSixPlus);
+	const [maxN, setMaxN] = useState(useStore.getState().max ?? 10);
+	const [noSix, setNoSix] = useState(useStore.getState().noSixPlus);
 	const locked = useLocked();
 	const [err, setErr] = useState<string | null>(null);
-	const changed = bonusStr !== String(gBonus) || maxN !== gMax||noSix!==gNoSix;
+	const changed = bonusStr !== String(gBonus) || maxN !== gMax || noSix !== gNoSix;
 	const apply = () => {
 		if (bonusStr === "") return void setErr("値を入力してください");
 		const bonusN = Number.parseInt(bonusStr, 10);
@@ -51,7 +51,7 @@ function BonusView() {
 		if (bonusN < 0 || bonusN > 435) return void setErr("ボーナスは0〜435の範囲で入力してください");
 		if (maxN < 0 || maxN > 99) return void setErr("最大スコアは0〜99の範囲で入力してください");
 		setErr(null);
-		useStore.setState({ bonus: bonusN, max: maxN,noSixPlus:noSix });
+		useStore.setState({ bonus: bonusN, max: maxN, noSixPlus: noSix });
 		setBonusStr(bonusN.toString());
 		setBonus();
 	};
@@ -73,13 +73,14 @@ function BonusView() {
 						value={maxN}
 						onChange={(ev) => setMaxN(Number.parseInt(ev.currentTarget.value, 10))}
 					>
-						<option value={20} label="10万〜" />
-						<option value={30} label="15万〜" />
-						<option value={40} label="20万〜" />
-						<option value={50} label="25万〜" />
-						<option value={60} label="30万〜" />
-						<option value={70} label="35万〜" />
-						<option value={80} label="40万〜" />
+						<option value={10} label="10万〜" />
+						<option value={20} label="15万〜" />
+						<option value={30} label="20万〜" />
+						<option value={40} label="25万〜" />
+						<option value={50} label="30万〜" />
+						<option value={60} label="35万〜" />
+						<option value={70} label="40万〜" />
+						<option value={100} label="無制限" />
 					</select>
 					<div className="absolute pointer-events-none right-1 inset-y-0 flex items-center">
 						<svg x="0px" y="0px" viewBox="0 0 512 512" width={16} height={16}>
@@ -94,7 +95,7 @@ function BonusView() {
 				</div>
 			</label>
 			<label>
-				<input type="checkbox" checked={noSix} onChange={e=>setNoSix(e.target.checked)} />
+				<input type="checkbox" checked={noSix} onChange={(e) => setNoSix(e.target.checked)} />
 				6炊き以上を使わない
 			</label>
 			{err && <div style={{ color: "red" }}>{err}</div>}
@@ -121,8 +122,8 @@ function CalcView() {
 	const [err, setErr] = useState<string | null>(null);
 	const nowNum = Number.parseInt(nowStr, 10);
 	const targetNum = Number.parseInt(targetStr, 10);
-	const result=useStore(s=>s.result)
-	const changed = targetNum - nowNum !== xg || result==null;
+	const result = useStore((s) => s.result);
+	const changed = targetNum - nowNum !== xg || result == null;
 	const apply = () => {
 		if (nowStr === "" || targetStr === "") return void setErr("値を入力してください");
 		if (Number.isNaN(nowNum) || Number.isNaN(targetNum) || nowNum < 0 || targetNum < 0)
@@ -166,7 +167,7 @@ function ResultView() {
 					すべて再表示
 				</button>
 			</div>
-			<div className="flex flex-col gap-1">
+			<div className="flex flex-col">
 				{mapResult(result, prev ?? 0).map(({ data, prev }, i) => (
 					<ResultEntry key={Object.values(data).join("") + prev + forKey} data={data} prev={prev} />
 				))}
@@ -183,11 +184,30 @@ function mapResult(input: Result[], initPrev: number) {
 	}
 	return res;
 }
+const OpacDuration = 500;
+const SlideDuration = 500;
+const transitions = [
+	`opacity ${OpacDuration}ms 0s`,
+	`height ${SlideDuration}ms ${OpacDuration}ms`,
+	`margin-bottom ${SlideDuration}ms ${OpacDuration}ms`,
+	`border-width ${SlideDuration}ms ${OpacDuration}ms`,
+].join(",");
+const animationStyle = {
+	transition: transitions,
+	opacity: 0,
+	height: 0,
+	marginBottom: 0,
+	borderWidth: 0,
+} satisfies CSSProperties;
 function ResultEntry({ data, prev }: { data: Result; prev: number }) {
-	const [done, setDone] = useState(false);
-	if (done) return null;
+	const [state, setState] = useState<"show" | "animation" | "hidden">("show");
+	if (state === "hidden") return null;
 	return (
-		<div className="border flex gap-5">
+		<div
+			className="border flex gap-5 h-20 overflow-hidden mb-2"
+			style={state === "animation" ? animationStyle : {}}
+			onTransitionEnd={(e) => e.propertyName === "height" && setState("hidden")}
+		>
 			<div>
 				<div>
 					{data.bonus}%編成・{parseLiveB(data.liveB)}炊き
@@ -210,10 +230,11 @@ function ResultEntry({ data, prev }: { data: Result; prev: number }) {
 				</div>
 			</div>
 			<div>
-				<button type="button" onClick={() => setDone(true)}>
+				<button type="button" onClick={() => setState("animation")}>
 					<svg x="0px" y="0px" width={32} height={32} viewBox="0 0 512 512">
 						<g>
-							<polygon fill="#000"
+							<polygon
+								fill="#000"
 								points="440.469,73.413 218.357,295.525 71.531,148.709 0,220.229 146.826,367.055 218.357,438.587 
 		289.878,367.055 512,144.945 	"
 							/>

@@ -1,3 +1,4 @@
+import { LIVEB_MAP } from "./const";
 import wasmUrl from "./p-calc.wasm?url";
 import type { DataMap, Exports, Func, Result, WorkerMessages } from "./types";
 import { fetchBonusArray } from "./util";
@@ -21,7 +22,7 @@ const init: Func<"init"> = async () => {
 	wasm = instance as WebAssembly.Instance & { exports: Exports };
 	return null;
 };
-const setBonus: Func<"setBonus"> = async ({ data: { bonus, max } }) => {
+const setBonus: Func<"setBonus"> = async ({ data: { bonus, max, noSixPlus } }) => {
 	assertWasm(wasm);
 	wasm.exports.resetAll();
 	const startPointer = wasm.exports.setBonusArray();
@@ -29,9 +30,9 @@ const setBonus: Func<"setBonus"> = async ({ data: { bonus, max } }) => {
 	let length = 0;
 	const { data, min } = await fetchBonusArray(
 		bonus,
-		(n) => n <= max,
-		(n) => {
-			i32arr[length] = n;
+		({ score, liveB }) => score <= max && (noSixPlus ? liveB < LIVEB_MAP[6]! : true),
+		({ point }) => {
+			i32arr[length] = point;
 			length++;
 		},
 	);

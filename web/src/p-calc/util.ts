@@ -1,6 +1,7 @@
 import type { DataMap } from "./types";
 
-export async function fetchBonusArray(bonus: number, filter: (n: number) => boolean, write: (n: number) => void) {
+type DataItem = { point: number; score: number; music: number; liveB: number };
+export async function fetchBonusArray(bonus: number, filter: (n: DataItem) => boolean, write: (n: DataItem) => void) {
 	const res = await fetch(`/p-calc/b/${bonus}.csv`);
 	if (!res.ok) throw new Error(`データ取得エラー: ${res.statusText}`);
 	const body = res.body;
@@ -18,8 +19,9 @@ export async function fetchBonusArray(bonus: number, filter: (n: number) => bool
 			return n;
 		});
 		if (point == null || score == null || music == null || liveB == null) continue;
-		if (filter(score) === false) continue;
-		write(point);
+		const item: DataItem = { point, score, music, liveB };
+		if (filter(item) === false) continue;
+		write(item);
 		min = Math.min(min, point);
 		if (data.get(point) == null) data.set(point, []);
 		data.get(point)!.push({ music, score, liveB });

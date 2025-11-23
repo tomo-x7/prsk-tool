@@ -1,3 +1,17 @@
+export const LIVEB_MAP = {
+	0: 1,
+	1: 5,
+	2: 10,
+	3: 15,
+	4: 20,
+	5: 25,
+	6: 27,
+	7: 29,
+	8: 31,
+	9: 33,
+	10: 35,
+} as Readonly<Record<number, number | undefined>>;
+
 export const LIVEB_REVERSE_MAP = {
 	1: 0,
 	5: 1,
