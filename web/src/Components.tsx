@@ -56,5 +56,5 @@ export function Button({
 	);
 }
 export function Card({ children }: PropsWithChildren) {
-	return <div className="border rounded-md p-4 shadow-md my-2">{children}</div>;
+	return <div className="border rounded-md p-4 shadow-md my-2 box-border">{children}</div>;
 }
