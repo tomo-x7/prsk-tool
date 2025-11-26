@@ -1,10 +1,11 @@
-import { type CSSProperties, use, useState } from "react";
+import { type CSSProperties, use, useEffect, useState } from "react";
 import { createCallable } from "react-call";
 import { MoonLoader } from "react-spinners";
-import { Button, Card, NumberInput } from "../Components";
+import { AnimatedErase, Button, Card, NumberInput } from "../Components";
 import { calc, initPromise, setBonus, useLocked, useStore } from "./algo";
 import { LIVEB_REVERSE_MAP, MUSIC_MAP } from "./const";
 import type { Result } from "./types";
+import { useDisplayMin } from "../Contexts";
 
 export default function PCalc() {
 	use(initPromise);
@@ -23,8 +24,8 @@ export default function PCalc() {
 	}
 	return (
 		<div>
-			<div>イベント編成そのままでできるポイント調整ツールです。</div>
-			<div>イベントボーナスは小数には対応していません(WL時)。</div>
+			<div className="max-min:text-sm">イベント編成そのままでできるポイント調整ツールです。</div>
+			<div className="max-min:text-sm">イベントボーナスは小数には対応していません(WL時)。</div>
 			<BonusView />
 			{canCalc && <CalcView />}
 			{result && <ResultView />}
@@ -140,7 +141,7 @@ function CalcView() {
 			return void setErr("正の数値を入力してください");
 		if (nowNum >= targetNum) return void setErr("目標値は現在のポイントより大きい値を入力してください");
 		if (targetNum - nowNum > 300000) return void setErr("30万ポイント差までのみ対応しています");
-		if (targetNum - nowNum < (minPoint ?? 100)) return void setErr(`現在の編成では${minPoint}以上のみ可能です`);
+		if (targetNum - nowNum < (minPoint ?? 100)) return void setErr(`現在の編成では${minPoint??100}ポイント差以上のみ可能です`);
 		useStore.setState({ x: targetNum - nowNum, now: nowNum });
 		setNowStr(nowNum.toString());
 		setTargetStr(targetNum.toString());
@@ -150,8 +151,8 @@ function CalcView() {
 	return (
 		<Card>
 			<div className="flex flex-col gap-3">
-				<NumberInput label="現在のポイント" value={nowStr} onChange={setNowStr} disabled={locked} />
-				<NumberInput label="目標値" value={targetStr} onChange={setTargetStr} disabled={locked} />
+				<NumberInput label="現在のポイント" value={nowStr} onChange={setNowStr} disabled={locked} width={130} />
+				<NumberInput label="目標値" value={targetStr} onChange={setTargetStr} disabled={locked} width={130} />
 				{err && <div style={{ color: "red" }}>{err}</div>}
 				<Button className="mt-1" disabled={locked || !changed || !nowStr || !targetStr} onClick={apply}>
 					計算
@@ -166,14 +167,14 @@ function ResultView() {
 	const x = useStore((s) => s.x);
 	const prev = useStore((s) => s.now);
 	const [forKey, setForKey] = useState(0);
-	if (!result) return null;
+	if (result==null) return null;
 	if (result === -1) {
 		return <Card>今の編成だけでは作れないポイントです。今後別編成の使用にも対応予定</Card>;
 	}
 	return (
 		<Card>
-			<div>必要ポイント: {x}P</div>
-			<div className="flex justify-between">
+			<div className="max-min:text-sm">必要ポイント: {x}P</div>
+			<div className="flex justify-between mt-2 mb-1 max-min:text-sm">
 				<div>計算結果</div>
 				<button className="text-blue-600 underline" type="button" onClick={() => setForKey((s) => s + 1)}>
 					すべて再表示
@@ -196,36 +197,19 @@ function mapResult(input: Result[], initPrev: number) {
 	}
 	return res;
 }
-const OpacDuration = 500;
-const SlideDuration = 500;
-const transitions = [
-	`opacity ${OpacDuration}ms 0s`,
-	`height ${SlideDuration}ms ${OpacDuration}ms`,
-	`margin-bottom ${SlideDuration}ms ${OpacDuration}ms`,
-	`border-width ${SlideDuration}ms ${OpacDuration}ms`,
-].join(",");
-const animationStyle = {
-	transition: transitions,
-	opacity: 0,
-	height: 0,
-	marginBottom: 0,
-	borderWidth: 0,
-} satisfies CSSProperties;
+
 function ResultEntry({ data, prev }: { data: Result; prev: number }) {
-	const [state, setState] = useState<"show" | "animation" | "hidden">("show");
-	if (state === "hidden") return null;
+	const [erased, setErased] = useState(false);
+	const isMin=useDisplayMin();
+	
 	return (
-		<div
-			className="border flex gap-5 h-20 overflow-hidden mb-2"
-			style={state === "animation" ? animationStyle : {}}
-			onTransitionEnd={(e) => e.propertyName === "height" && setState("hidden")}
-		>
-			<div>
+		<AnimatedErase erased={erased} height={isMin?65:80} className="border flex overflow-hidden mb-2 max-min:text-sm">
+			<div className="grow">
 				<div>
-					{data.bonus}%編成・{parseLiveB(data.liveB)}炊き
+					{data.bonus}%・{parseLiveB(data.liveB)}炊
 				</div>
 				<div>
-					スコア: {scoreMin(data.score)}〜{scoreMax(data.score)}
+					スコア:{scoreMin(data.score)}〜{scoreMax(data.score)}
 				</div>
 				<button
 					type="button"
@@ -235,26 +219,25 @@ function ResultEntry({ data, prev }: { data: Result; prev: number }) {
 					楽曲基礎点: {data.music}
 				</button>
 			</div>
-			<div>
-				<div>{data.point}ポイント</div>
+			<div className="grow flex flex-col justify-end-safe ">
+				<div>{data.point}{isMin?" P":"ポイント"}</div>
 				<div>
-					{prev}→{prev + data.point}
+					{prev} → {prev + data.point}
 				</div>
 			</div>
-			<div>
-				<button type="button" onClick={() => setState("animation")}>
-					<svg x="0px" y="0px" width={32} height={32} viewBox="0 0 512 512">
+			<div className="flex-none flex flex-col justify-center">
+				<button type="button" onClick={() => setErased(true)}>
+					<svg x="0px" y="0px" width={isMin?24:32} height={isMin?24:32} viewBox="0 0 512 512">
 						<g>
 							<polygon
 								fill="#000"
-								points="440.469,73.413 218.357,295.525 71.531,148.709 0,220.229 146.826,367.055 218.357,438.587 
-		289.878,367.055 512,144.945 	"
+								points="440.469,73.413 218.357,295.525 71.531,148.709 0,220.229 146.826,367.055 218.357,438.587 289.878,367.055 512,144.945"
 							/>
 						</g>
 					</svg>
 				</button>
 			</div>
-		</div>
+		</AnimatedErase>
 	);
 }
 
@@ -269,8 +252,8 @@ const musicList = createCallable<{ p: number }>(({ p, call }) => {
 				onClick={(ev) => ev.stopPropagation()}
 				className="bg-white p-4 flex flex-1 flex-col max-h-[90dvh] overflow-hidden w-xl max-w-dvh "
 			>
-				<div className="text-base">基礎点が{p}の楽曲一覧</div>
-				<div className="overflow-y-auto" style={{ height: "calc(100% - 1rem)" }}>
+				<div className="text-lg max-min:text-base">基礎点が{p}の楽曲一覧</div>
+				<div className="text-base max-min:text-sm overflow-y-auto" style={{ height: "calc(100% - 1rem)" }}>
 					{arr.map((name) => (
 						<div key={name}>・{name}</div>
 					))}

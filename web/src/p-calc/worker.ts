@@ -59,6 +59,7 @@ function readResult({ pointer, size }: { pointer: number; size: number }): Resul
 		const r = arr.sort((a, b) => a.liveB - b.liveB)[0];
 		result.push({ ...r, bonus: curBonus, point: v });
 	}
+	result.sort((a, b) => b.point - a.point);
 	return result;
 }
 const calc: Func<"calc"> = async ({ data: x }) => {
