@@ -1,10 +1,10 @@
 import { type CSSProperties, use, useState } from "react";
 import { createCallable } from "react-call";
+import { MoonLoader } from "react-spinners";
 import { Button, Card, NumberInput } from "../Components";
 import { calc, initPromise, setBonus, useLocked, useStore } from "./algo";
 import { LIVEB_REVERSE_MAP, MUSIC_MAP } from "./const";
 import type { Result } from "./types";
-import {MoonLoader} from "react-spinners"
 
 export default function PCalc() {
 	use(initPromise);
@@ -33,10 +33,12 @@ export default function PCalc() {
 		</div>
 	);
 }
-function Loading(){
-	return <div className="inset-0 fixed z-50 bg-black/50 flex justify-center items-center">
-		<MoonLoader color="#fff" size={128} />
-	</div>
+function Loading() {
+	return (
+		<div className="inset-0 fixed z-50 bg-black/50 flex justify-center items-center">
+			<MoonLoader color="#fff" size={128} />
+		</div>
+	);
 }
 
 function BonusView() {
@@ -105,10 +107,10 @@ function BonusView() {
 					<input type="checkbox" checked={noSix} onChange={(e) => setNoSix(e.target.checked)} />
 					6炊き以上を使わない
 				</label>
-			{err && <div style={{ color: "red" }}>{err}</div>}
-			<Button className="mt-1" disabled={!changed || !bonusStr || !maxN || locked} onClick={apply}>
-				{canCalc || !changed ? "更新" : "次へ"}
-			</Button>
+				{err && <div style={{ color: "red" }}>{err}</div>}
+				<Button className="mt-1" disabled={!changed || !bonusStr || !maxN || locked} onClick={apply}>
+					{canCalc || !changed ? "更新" : "次へ"}
+				</Button>
 			</div>
 		</Card>
 	);
