@@ -4,6 +4,7 @@ import { Button, Card, NumberInput } from "../Components";
 import { calc, initPromise, setBonus, useLocked, useStore } from "./algo";
 import { LIVEB_REVERSE_MAP, MUSIC_MAP } from "./const";
 import type { Result } from "./types";
+import {MoonLoader} from "react-spinners"
 
 export default function PCalc() {
 	use(initPromise);
@@ -27,10 +28,15 @@ export default function PCalc() {
 			<BonusView />
 			{canCalc && <CalcView />}
 			{result && <ResultView />}
-			{locked && <div className="inset-0 fixed z-50 bg-black/50" />}
+			{locked && <Loading />}
 			<musicList.Root />
 		</div>
 	);
+}
+function Loading(){
+	return <div className="inset-0 fixed z-50 bg-black/50 flex justify-center items-center">
+		<MoonLoader color="#fff" size={128} />
+	</div>
 }
 
 function BonusView() {
@@ -57,51 +63,53 @@ function BonusView() {
 	};
 	return (
 		<Card>
-			<NumberInput
-				label="編成のイベントボーナス"
-				value={bonusStr}
-				onChange={setBonusStr}
-				min={0}
-				max={435}
-				disabled={locked}
-			/>
-			<label className="flex gap-2">
-				総合力目安:
-				<div className="relative w-20">
-					<select
-						className="border w-full focus:outline-2 outline-black appearance-none"
-						value={maxN}
-						onChange={(ev) => setMaxN(Number.parseInt(ev.currentTarget.value, 10))}
-					>
-						<option value={10} label="10万〜" />
-						<option value={20} label="15万〜" />
-						<option value={30} label="20万〜" />
-						<option value={40} label="25万〜" />
-						<option value={50} label="30万〜" />
-						<option value={60} label="35万〜" />
-						<option value={70} label="40万〜" />
-						<option value={100} label="無制限" />
-					</select>
-					<div className="absolute pointer-events-none right-1 inset-y-0 flex items-center">
-						<svg x="0px" y="0px" viewBox="0 0 512 512" width={16} height={16}>
-							<g>
-								<polygon
-									fill="#000"
-									points="440.189,92.085 256.019,276.255 71.83,92.085 0,163.915 256.019,419.915 512,163.915 	"
-								/>
-							</g>
-						</svg>
+			<div className="flex flex-col gap-3">
+				<NumberInput
+					label="編成のイベントボーナス"
+					value={bonusStr}
+					onChange={setBonusStr}
+					min={0}
+					max={435}
+					disabled={locked}
+				/>
+				<label className="flex gap-2">
+					総合力目安:
+					<div className="relative w-20">
+						<select
+							className="border w-full focus:outline-2 outline-black appearance-none"
+							value={maxN}
+							onChange={(ev) => setMaxN(Number.parseInt(ev.currentTarget.value, 10))}
+						>
+							<option value={10} label="10万〜" />
+							<option value={20} label="15万〜" />
+							<option value={30} label="20万〜" />
+							<option value={40} label="25万〜" />
+							<option value={50} label="30万〜" />
+							<option value={60} label="35万〜" />
+							<option value={70} label="40万〜" />
+							<option value={99} label="無制限" />
+						</select>
+						<div className="absolute pointer-events-none right-1 inset-y-0 flex items-center">
+							<svg x="0px" y="0px" viewBox="0 0 512 512" width={16} height={16}>
+								<g>
+									<polygon
+										fill="#000"
+										points="440.189,92.085 256.019,276.255 71.83,92.085 0,163.915 256.019,419.915 512,163.915 	"
+									/>
+								</g>
+							</svg>
+						</div>
 					</div>
-				</div>
-			</label>
-			<label>
-				<input type="checkbox" checked={noSix} onChange={(e) => setNoSix(e.target.checked)} />
-				6炊き以上を使わない
-			</label>
+				</label>
+				<label>
+					<input type="checkbox" checked={noSix} onChange={(e) => setNoSix(e.target.checked)} />
+					6炊き以上を使わない
+				</label>
 			{err && <div style={{ color: "red" }}>{err}</div>}
-			<Button disabled={!changed || !bonusStr || !maxN || locked} onClick={apply}>
+			<Button className="mt-1" disabled={!changed || !bonusStr || !maxN || locked} onClick={apply}>
 				{canCalc || !changed ? "更新" : "次へ"}
 			</Button>
+			</div>
 		</Card>
 	);
 }
@@ -139,12 +147,14 @@ function CalcView() {
 	};
 	return (
 		<Card>
-			<NumberInput label="現在のポイント" value={nowStr} onChange={setNowStr} disabled={locked} />
-			<NumberInput label="目標値" value={targetStr} onChange={setTargetStr} disabled={locked} />
-			{err && <div style={{ color: "red" }}>{err}</div>}
-			<Button disabled={locked || !changed || !nowStr || !targetStr} onClick={apply}>
-				計算
-			</Button>
+			<div className="flex flex-col gap-3">
+				<NumberInput label="現在のポイント" value={nowStr} onChange={setNowStr} disabled={locked} />
+				<NumberInput label="目標値" value={targetStr} onChange={setTargetStr} disabled={locked} />
+				{err && <div style={{ color: "red" }}>{err}</div>}
+				<Button className="mt-1" disabled={locked || !changed || !nowStr || !targetStr} onClick={apply}>
+					計算
+				</Button>
+			</div>
 		</Card>
 	);
 }

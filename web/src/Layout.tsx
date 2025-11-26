@@ -61,6 +61,16 @@ function SideMenu({ close }: { close?: () => void }) {
 				<SideMenuItem name="ポイント調整ツール" href="/p-calc" close={close} />
 			</div>
 			<div className="text-sm">
+				<div className="mb-2">
+					<a
+						className="underline text-blue-600"
+						href="https://github.com/tomo-x7/prsk-tool"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						GitHub Repository
+					</a>
+				</div>
 				<div>
 					Developed by{" "}
 					<a
@@ -70,16 +80,6 @@ function SideMenu({ close }: { close?: () => void }) {
 						className="underline text-blue-600"
 					>
 						@tomo-x
-					</a>
-				</div>
-				<div>
-					<a
-						className="underline text-blue-600"
-						href="https://github.com/tomo-x7/prsk-tool"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						GitHub Repository
 					</a>
 				</div>
 				<div className="flex flex-col mt-1">

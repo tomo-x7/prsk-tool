@@ -16,8 +16,8 @@ export function NumberInput({
 	disabled?: boolean;
 }) {
 	return (
-		<div>
-			<label className="flex gap-2">
+		<div className="">
+			<label className="flex gap-2 items-center">
 				<div>{label}:</div>
 				<input
 					className="flex-0 border invalid:border-red-600 invalid:outline-red-600 min-w-16 focus:outline-2 outline-black"

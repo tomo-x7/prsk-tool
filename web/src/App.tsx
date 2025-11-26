@@ -18,8 +18,8 @@ function PCalc() {
 }
 function Loading() {
 	return (
-		<div>
-			<ScaleLoader />
+		<div className="w-full flex justify-center">
+			<ScaleLoader width={12} height={105} margin={6}  />
 		</div>
 	);
 }
