@@ -31,7 +31,7 @@ export function Layout() {
 				</div>
 			</header>
 			<div className="grow flex flex-col items-center md:ml-48 mt-10">
-				<div className="min-w-[350px] max-w-[600px] m-2">
+				<div className="min-w-[300px] max-w-[600px] m-2">
 					<Outlet />
 				</div>
 			</div>
