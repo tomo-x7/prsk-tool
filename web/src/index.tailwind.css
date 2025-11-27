@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* biome-ignore lint/suspicious/noUnknownAtRules: tailwind css  */
 @theme {
 	--breakpoint-min: 400px;
 }

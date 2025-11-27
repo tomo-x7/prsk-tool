@@ -1,14 +1,4 @@
-import {
-	useEffect,
-	useImperativeHandle,
-	useState,
-	type CSSProperties,
-	type MouseEvent,
-	type PropsWithChildren,
-	type ReactNode,
-	type Ref,
-	type RefObject,
-} from "react";
+import { type CSSProperties, type MouseEvent, type PropsWithChildren, type ReactNode, useState } from "react";
 
 export function NumberInput({
 	onChange,

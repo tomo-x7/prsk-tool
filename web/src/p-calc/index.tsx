@@ -1,11 +1,11 @@
-import { type CSSProperties, use, useEffect, useState } from "react";
+import { use, useState } from "react";
 import { createCallable } from "react-call";
 import { MoonLoader } from "react-spinners";
 import { AnimatedErase, Button, Card, NumberInput } from "../Components";
+import { useDisplayMin } from "../Contexts";
 import { calc, initPromise, setBonus, useLocked, useStore } from "./algo";
 import { LIVEB_REVERSE_MAP, MUSIC_MAP } from "./const";
 import type { Result } from "./types";
-import { useDisplayMin } from "../Contexts";
 
 export default function PCalc() {
 	use(initPromise);
@@ -141,7 +141,8 @@ function CalcView() {
 			return void setErr("正の数値を入力してください");
 		if (nowNum >= targetNum) return void setErr("目標値は現在のポイントより大きい値を入力してください");
 		if (targetNum - nowNum > 300000) return void setErr("30万ポイント差までのみ対応しています");
-		if (targetNum - nowNum < (minPoint ?? 100)) return void setErr(`現在の編成では${minPoint??100}ポイント差以上のみ可能です`);
+		if (targetNum - nowNum < (minPoint ?? 100))
+			return void setErr(`現在の編成では${minPoint ?? 100}ポイント差以上のみ可能です`);
 		useStore.setState({ x: targetNum - nowNum, now: nowNum });
 		setNowStr(nowNum.toString());
 		setTargetStr(targetNum.toString());
@@ -166,9 +167,9 @@ function ResultView() {
 	const result = useStore((s) => s.result);
 	const x = useStore((s) => s.x);
 	const prev = useStore((s) => s.now);
-	const isMin=useDisplayMin()
+	const isMin = useDisplayMin();
 	const [forKey, setForKey] = useState(0);
-	if (result==null) return null;
+	if (result == null) return null;
 	if (result === -1) {
 		return <Card>今の編成だけでは作れないポイントです。今後別編成の使用にも対応予定</Card>;
 	}
@@ -181,7 +182,10 @@ function ResultView() {
 					すべて再表示
 				</button>
 			</div>
-			<div className="grid justify-between w-full" style={{gridTemplateColumns:`auto auto ${isMin?24:32}px`}}>
+			<div
+				className="grid justify-between w-full"
+				style={{ gridTemplateColumns: `auto auto ${isMin ? 24 : 32}px` }}
+			>
 				{mapResult(result, prev ?? 0).map(({ data, prev }, i) => (
 					<ResultEntry key={Object.values(data).join("") + prev + forKey} data={data} prev={prev} />
 				))}
@@ -201,16 +205,20 @@ function mapResult(input: Result[], initPrev: number) {
 
 function ResultEntry({ data, prev }: { data: Result; prev: number }) {
 	const [erased, setErased] = useState(false);
-	const isMin=useDisplayMin();
-	
+	const isMin = useDisplayMin();
+
 	return (
-		<AnimatedErase erased={erased} height={isMin?65:80} className="border overflow-hidden mb-2 max-min:text-sm grid grid-cols-subgrid col-start-1 col-end-4">
+		<AnimatedErase
+			erased={erased}
+			height={isMin ? 65 : 80}
+			className="border overflow-hidden mb-2 max-min:text-sm grid grid-cols-subgrid col-start-1 col-end-4"
+		>
 			<div className="col-start-1 col-end-2 self-start min-w-0">
 				<div>
 					{data.bonus}%・{parseLiveB(data.liveB)}炊
 				</div>
 				<div>
-					スコア:{scoreMin(data.score)}〜{scoreMax(data.score)}
+					{scoreMin(data.score)}〜{scoreMax(data.score)}点
 				</div>
 				<button
 					type="button"
@@ -221,14 +229,19 @@ function ResultEntry({ data, prev }: { data: Result; prev: number }) {
 				</button>
 			</div>
 			<div className="col-start-2 col-end-3 self-start min-w-0">
-				<div>{data.point}{isMin?" P":"ポイント"}</div>
 				<div>
-					{prev} → {prev + data.point}
+					{data.point}
+					{isMin ? " P" : "ポイント"}
+				</div>
+				<div>
+					<div>{prev}</div>
+					<div>↓</div>
+					<div>{prev + data.point}</div>
 				</div>
 			</div>
 			<div className="col-start-3 col-end-4 flex flex-col justify-center">
 				<button type="button" onClick={() => setErased(true)}>
-					<svg x="0px" y="0px" width={isMin?24:32} height={isMin?24:32} viewBox="0 0 512 512">
+					<svg x="0px" y="0px" width={isMin ? 24 : 32} height={isMin ? 24 : 32} viewBox="0 0 512 512">
 						<g>
 							<polygon
 								fill="#000"
