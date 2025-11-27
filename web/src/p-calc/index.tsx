@@ -166,6 +166,7 @@ function ResultView() {
 	const result = useStore((s) => s.result);
 	const x = useStore((s) => s.x);
 	const prev = useStore((s) => s.now);
+	const isMin=useDisplayMin()
 	const [forKey, setForKey] = useState(0);
 	if (result==null) return null;
 	if (result === -1) {
@@ -180,7 +181,7 @@ function ResultView() {
 					すべて再表示
 				</button>
 			</div>
-			<div className="flex flex-col">
+			<div className="grid justify-between w-full" style={{gridTemplateColumns:`auto auto ${isMin?24:32}px`}}>
 				{mapResult(result, prev ?? 0).map(({ data, prev }, i) => (
 					<ResultEntry key={Object.values(data).join("") + prev + forKey} data={data} prev={prev} />
 				))}
@@ -203,8 +204,8 @@ function ResultEntry({ data, prev }: { data: Result; prev: number }) {
 	const isMin=useDisplayMin();
 	
 	return (
-		<AnimatedErase erased={erased} height={isMin?65:80} className="border flex overflow-hidden mb-2 max-min:text-sm">
-			<div className="grow">
+		<AnimatedErase erased={erased} height={isMin?65:80} className="border overflow-hidden mb-2 max-min:text-sm grid grid-cols-subgrid col-start-1 col-end-4">
+			<div className="col-start-1 col-end-2 self-start min-w-0">
 				<div>
 					{data.bonus}%・{parseLiveB(data.liveB)}炊
 				</div>
@@ -219,13 +220,13 @@ function ResultEntry({ data, prev }: { data: Result; prev: number }) {
 					楽曲基礎点: {data.music}
 				</button>
 			</div>
-			<div className="grow flex flex-col justify-end-safe ">
+			<div className="col-start-2 col-end-3 self-start min-w-0">
 				<div>{data.point}{isMin?" P":"ポイント"}</div>
 				<div>
 					{prev} → {prev + data.point}
 				</div>
 			</div>
-			<div className="flex-none flex flex-col justify-center">
+			<div className="col-start-3 col-end-4 flex flex-col justify-center">
 				<button type="button" onClick={() => setErased(true)}>
 					<svg x="0px" y="0px" width={isMin?24:32} height={isMin?24:32} viewBox="0 0 512 512">
 						<g>
