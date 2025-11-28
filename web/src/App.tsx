@@ -1,15 +1,18 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter, createRoutesFromChildren, Link, Route, RouterProvider } from "react-router-dom";
 import { ScaleLoader } from "react-spinners";
-import { MetaProvider, useSetDescription, useSetTitle } from "./util.tsx";
-import "react-modern-drawer/dist/index.css";
 import { Layout } from "./Layout.tsx";
+import { MetaProvider, useSetDescription, useSetTitle } from "./util.tsx";
+
+import "react-modern-drawer/dist/index.css";
 
 const PCalcInner = lazy(() => import("./p-calc"));
 
 function PCalc() {
-	useSetTitle("ポイント調整ツールβ");
-	useSetDescription("イベント編成のままでポイント調整が簡単にできるツール。");
+	useSetTitle("プロセカポイント調整ツールβ");
+	useSetDescription(
+		"ポイント調整が最も簡単にできるツール。イベント編成がそのまま使えます。編成と目標ポイントを入力するだけで、ポイント調整の手順が自動生成されます。",
+	);
 	return (
 		<Suspense fallback={<Loading />}>
 			<PCalcInner />
@@ -36,7 +39,7 @@ const router = createBrowserRouter(
 
 function Top() {
 	useSetTitle("プロセカツール集");
-	useSetDescription("プロセカ関係の便利なツールとか。今はポイント調整ツールがあるよ。");
+	useSetDescription("プロセカ関係の便利なツールとか");
 	return (
 		<div>
 			<div>
