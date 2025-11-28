@@ -4,3 +4,7 @@
 @theme {
 	--breakpoint-min: 400px;
 }
+
+html:has(.html-scroll-none) {
+	overscroll-behavior: none;
+}

@@ -23,7 +23,7 @@ export default function PCalc() {
 		);
 	}
 	return (
-		<div>
+		<div className="html-scroll-none">
 			<div className="max-min:text-sm">イベント編成そのままでできるポイント調整ツールです。</div>
 			<div className="max-min:text-sm">イベントボーナスは小数には対応していません(WL時)。</div>
 			<BonusView />
