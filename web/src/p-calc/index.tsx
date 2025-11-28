@@ -183,7 +183,7 @@ function ResultView() {
 				</button>
 			</div>
 			<div
-				className="grid justify-between w-full"
+				className="grid justify-stretch w-full"
 				style={{ gridTemplateColumns: `auto auto ${isMin ? 24 : 32}px` }}
 			>
 				{mapResult(result, prev ?? 0).map(({ data, prev }, i) => (
@@ -233,10 +233,9 @@ function ResultEntry({ data, prev }: { data: Result; prev: number }) {
 					{data.point}
 					{isMin ? " P" : "ポイント"}
 				</div>
-				<div>
-					<div>{prev}</div>
-					<div>↓</div>
-					<div>{prev + data.point}</div>
+				<div className="flex flex-col justify-center ml-2">
+					<div className="">{prev}</div>
+					<div className="ml-1">→ {prev + data.point}</div>
 				</div>
 			</div>
 			<div className="col-start-3 col-end-4 flex flex-col justify-center">
