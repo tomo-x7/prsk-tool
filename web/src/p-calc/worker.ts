@@ -1,9 +1,10 @@
+import { LIVEB_MAP } from "./const";
 import wasmUrl from "./p-calc.wasm?url";
 import type { DataMap, Exports, Func, Result, WorkerMessages } from "./types";
 import { fetchBonusArray } from "./util";
 
 let wasm: (WebAssembly.Instance & { exports: Exports }) | null = null;
-let data: DataMap | null = null;
+let globalData: DataMap | null = null;
 let curBonus: number | null = null;
 function assertWasm<T>(wasm: T | null): asserts wasm is T {
 	if (wasm == null) throw new Error("WASM module not initialized");
@@ -21,23 +22,24 @@ const init: Func<"init"> = async () => {
 	wasm = instance as WebAssembly.Instance & { exports: Exports };
 	return null;
 };
-const setBonus: Func<"setBonus"> = async ({ data: { bonus, max } }) => {
+const setBonus: Func<"setBonus"> = async ({ data: { bonus, max, noSixPlus } }) => {
 	assertWasm(wasm);
 	wasm.exports.resetAll();
 	const startPointer = wasm.exports.setBonusArray();
 	const i32arr = new Int32Array(wasm.exports.memory.buffer, startPointer);
 	let length = 0;
-	data = await fetchBonusArray(
+	const { data, min } = await fetchBonusArray(
 		bonus,
-		(n) => n <= max,
-		(n) => {
-			i32arr[length] = n;
+		({ score, liveB }) => score <= max && (noSixPlus ? liveB < LIVEB_MAP[6]! : true),
+		({ point }) => {
+			i32arr[length] = point;
 			length++;
 		},
 	);
+	globalData = data;
 	curBonus = bonus;
 	wasm.exports.setBonusFin(length);
-	return null;
+	return { min };
 };
 function getResultData(x: number) {
 	assertWasm(wasm);
@@ -46,22 +48,23 @@ function getResultData(x: number) {
 }
 function readResult({ pointer, size }: { pointer: number; size: number }): Result[] {
 	assertWasm(wasm);
-	if (data == null) throw new Error("data not set");
+	if (globalData == null) throw new Error("data not set");
 	if (curBonus == null) throw new Error("curBonus not set");
 	const I32Arr = new Int32Array(wasm.exports.memory.buffer, pointer, size);
 	const result: Result[] = [];
 	console.log(I32Arr);
 	for (const v of I32Arr) {
-		const arr = data.get(v);
+		const arr = globalData.get(v);
 		if (arr == null || arr.length === 0) throw new Error("invalid");
 		const r = arr.sort((a, b) => a.liveB - b.liveB)[0];
 		result.push({ ...r, bonus: curBonus, point: v });
 	}
+	result.sort((a, b) => b.point - a.point);
 	return result;
 }
 const calc: Func<"calc"> = async ({ data: x }) => {
 	assertWasm(wasm);
-	if (data == null) throw new Error("data not set");
+	if (globalData == null) throw new Error("data not set");
 	if (curBonus == null) throw new Error("curBonus not set");
 	wasm.exports.resetDp();
 	wasm.exports.calc(x);
@@ -70,7 +73,7 @@ const calc: Func<"calc"> = async ({ data: x }) => {
 		const data = getResultData(0);
 		return readResult(data);
 	} else {
-		throw new Error("ベータ版のため未対応なケースです。再度実行するにはリロードしてください。");
+		return -1;
 	}
 };
 

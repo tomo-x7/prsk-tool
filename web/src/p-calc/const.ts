@@ -1,3 +1,17 @@
+export const LIVEB_MAP = {
+	0: 1,
+	1: 5,
+	2: 10,
+	3: 15,
+	4: 20,
+	5: 25,
+	6: 27,
+	7: 29,
+	8: 31,
+	9: 33,
+	10: 35,
+} as Readonly<Record<number, number | undefined>>;
+
 export const LIVEB_REVERSE_MAP = {
 	1: 0,
 	5: 1,
@@ -41,7 +55,6 @@ export const MUSIC_MAP = {
 		"Glory Steady Go!",
 		"テレキャスタービーボーイ",
 		"ワールドワイドワンダー",
-		"どんな結末がお望みだい？(削除)",
 		"Booo!",
 		"Highlight",
 		"星を繋ぐ",
@@ -553,7 +566,6 @@ export const MUSIC_MAP = {
 	],
 	"122": [
 		"千年の独奏歌",
-		"アサガオの散る頃に(削除)",
 		"ロストエンファウンド",
 		"フューチャー・イヴ",
 		"ジェヘナ",

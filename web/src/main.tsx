@@ -1,10 +1,13 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App.tsx";
-import "./index.css";
+import "./index.tailwind.css";
+import { DisplaySizeProvider } from "./Contexts.tsx";
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
-		<App />
+		<DisplaySizeProvider>
+			<App />
+		</DisplaySizeProvider>
 	</StrictMode>,
 );

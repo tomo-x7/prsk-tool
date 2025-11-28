@@ -21,12 +21,12 @@ export interface WorkerMessages {
 		Response: Response<"init">;
 	};
 	setBonus: {
-		Request: Request<"setBonus", { bonus: number; max: number }>;
-		Response: Response<"setBonus">;
+		Request: Request<"setBonus", { bonus: number; max: number; noSixPlus: boolean }>;
+		Response: Response<"setBonus", { min: number }>;
 	};
 	calc: {
 		Request: Request<"calc", number>;
-		Response: Response<"calc", Result[]>;
+		Response: Response<"calc", Result[] | -1>;
 	};
 }
 export interface Result {

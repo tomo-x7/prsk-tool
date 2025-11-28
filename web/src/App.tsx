@@ -1,72 +1,63 @@
-import { lazy, type ReactNode, Suspense } from "react";
-import { FaBluesky, FaGithub } from "react-icons/fa6";
-import { createBrowserRouter, createRoutesFromChildren, Link, Outlet, Route, RouterProvider } from "react-router-dom";
-import { TitleProvider, useSetTitle, useTitle } from "./util.tsx";
+import { lazy, Suspense } from "react";
+import { createBrowserRouter, createRoutesFromChildren, Link, Route, RouterProvider } from "react-router-dom";
+import { ScaleLoader } from "react-spinners";
+import { Layout } from "./Layout.tsx";
+import { MetaProvider, useSetDescription, useSetTitle } from "./util.tsx";
 
-const to = () => new Promise((resolve) => setTimeout(resolve, 0));
-const PCalc = lazy(() => to().then(() => import("./p-calc/index.tsx")));
+import "react-modern-drawer/dist/index.css";
+
+const PCalcInner = lazy(() => import("./p-calc"));
+
+function PCalc() {
+	useSetTitle("プロセカポイント調整ツールβ");
+	useSetDescription(
+		"ポイント調整が最も簡単にできるツール。イベント編成がそのまま使えます。編成と目標ポイントを入力するだけで、ポイント調整の手順が自動生成されます。",
+	);
+	return (
+		<Suspense fallback={<Loading />}>
+			<PCalcInner />
+		</Suspense>
+	);
+}
+function Loading() {
+	return (
+		<div className="w-full flex justify-center">
+			<ScaleLoader width={12} height={105} margin={6} />
+		</div>
+	);
+}
 
 const router = createBrowserRouter(
 	createRoutesFromChildren(
 		<Route element={<Layout />}>
-			<Route path="p-calc" element={<S e={<PCalc />} t="ポイント調整ツールβ" />} />
+			<Route path="p-calc" Component={PCalc} />
 			<Route index element={<Top />} />
 			<Route path="*" element={"Not Found"} />
 		</Route>,
 	),
 );
 
-function Layout() {
-	const title = useTitle();
-	return (
-		<div>
-			<header className="h-10 w-full flex flex-row justify-between">
-				<div></div>
-				<div>{title}</div>
-				<div className="flex flex-row">
-					<a href="https://github.com/tomo-x7/prsk-tool" target="_blank" rel="noopener noreferrer">
-						<FaGithub />
-					</a>
-					<a
-						href="https://bsky.app/profile/did:plc:qcwvyds5tixmcwkwrg3hxgxd"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						<FaBluesky />
-					</a>
-				</div>
-			</header>
-			<div>
-				<Outlet />
-			</div>
-		</div>
-	);
-}
-
-function S({ e, t }: { e: ReactNode; t: string }) {
-	useSetTitle(t);
-	return <Suspense fallback={<Loading />}>{e}</Suspense>;
-}
-function Loading() {
-	// useSetTitle("");
-	return <div>Loading...</div>;
-}
 function Top() {
 	useSetTitle("プロセカツール集");
+	useSetDescription("プロセカ関係の便利なツールとか");
 	return (
 		<div>
-			<div>ベータ版なう</div>
-			<Link to="/p-calc">ポイント調整ツール</Link>
+			<div>
+				<h2>
+					<Link className="text-blue-600 underline" to="/p-calc">
+						ポイント調整ツールβ
+					</Link>
+				</h2>
+				<p>イベント編成のままでポイント調整が簡単にできるツール。</p>
+			</div>
 		</div>
 	);
 }
 
 export function App() {
 	return (
-		<TitleProvider>
-			<Suspense fallback={<div>Loading...</div>}>
-				<RouterProvider router={router} />
-			</Suspense>
-		</TitleProvider>
+		<MetaProvider>
+			<RouterProvider router={router} />
+		</MetaProvider>
 	);
 }
