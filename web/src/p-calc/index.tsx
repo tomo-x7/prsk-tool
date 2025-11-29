@@ -24,8 +24,9 @@ export default function PCalc() {
 	}
 	return (
 		<div className="html-scroll-none">
-			<div className="max-min:text-sm">イベント編成そのままでできるポイント調整ツールです。</div>
-			<div className="max-min:text-sm">イベントボーナスは小数には対応していません(WL時)。</div>
+			<div className="max-min:text-sm">イベント編成そのままでできるポイント調整ツールです。ひとりでライブ専用。目標まで30万ポイント差まで対応しています。</div>
+			<div className="max-min:text-sm">使い方: ①イベント編成の数値を入力 ②現在のポイントと目標ポイントを入力 ③計算結果の通りにプレイ</div>
+			<div className="text-sm max-min:text-xs">イベントボーナスは小数には対応していません(WL時)。</div>
 			<BonusView />
 			{canCalc && <CalcView />}
 			{result && <ResultView />}
