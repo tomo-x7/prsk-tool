@@ -9,7 +9,7 @@ import "react-modern-drawer/dist/index.css";
 const PCalcInner = lazy(() => import("./p-calc"));
 
 function PCalc() {
-	useSetTitle("プロセカポイント調整ツールβ");
+	useSetTitle("プロセカポイント調整ツール");
 	useSetDescription(
 		"ポイント調整が最も簡単にできるツール。イベント編成がそのまま使えます。編成と目標ポイントを入力するだけで、ポイント調整の手順が自動生成されます。",
 	);
@@ -45,7 +45,7 @@ function Top() {
 			<div>
 				<h2>
 					<Link className="text-blue-600 underline" to="/p-calc">
-						ポイント調整ツールβ
+						ポイント調整ツール
 					</Link>
 				</h2>
 				<p>イベント編成のままでポイント調整が簡単にできるツール。</p>
