@@ -58,7 +58,7 @@ function SideMenu({ close }: { close?: () => void }) {
 		<div className="flex flex-col justify-between h-full px-1 py-2">
 			<div>
 				<SideMenuItem name="トップ" href="/" close={close} />
-				<SideMenuItem name="ポイント調整ツール" href="/p-calc" close={close} />
+				<SideMenuItem name="ポイント調整ツール" href="/p-calc/" close={close} />
 			</div>
 			<div className="text-sm">
 				<div className="mb-2">
