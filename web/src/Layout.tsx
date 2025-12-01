@@ -43,7 +43,7 @@ function Drawer() {
 	return (
 		<>
 			<div className="grid self-center">
-				<button type="button" onClick={() => setIsOpen(true)} area-label="メニュー" >
+				<button type="button" onClick={() => setIsOpen(true)} aria-label="メニュー" >
 					<GiHamburgerMenu size={30} />
 				</button>
 			</div>
