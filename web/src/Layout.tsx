@@ -25,15 +25,15 @@ export function Layout() {
 				</div>
 				<div className="text-xl">{title}</div>
 				<div className="flex flex-row">
-					<a href="https://github.com/tomo-x7/prsk-tool" target="_blank" rel="noopener noreferrer">
+					<a href="https://github.com/tomo-x7/prsk-tool" target="_blank" rel="noopener noreferrer" aria-label="Open GitHub">
 						<FaGithub size={26} />
 					</a>
 				</div>
 			</header>
 			<div className="grow flex flex-col items-center md:ml-48 mt-10">
-				<div className="min-w-[300px] max-w-[600px] m-2">
+				<main className="min-w-[300px] max-w-[600px] m-2">
 					<Outlet />
-				</div>
+				</main>
 			</div>
 		</div>
 	);
@@ -43,7 +43,7 @@ function Drawer() {
 	return (
 		<>
 			<div className="grid self-center">
-				<button type="button" onClick={() => setIsOpen(true)}>
+				<button type="button" onClick={() => setIsOpen(true)} area-label="メニュー" >
 					<GiHamburgerMenu size={30} />
 				</button>
 			</div>
@@ -56,10 +56,10 @@ function Drawer() {
 function SideMenu({ close }: { close?: () => void }) {
 	return (
 		<div className="flex flex-col justify-between h-full px-1 py-2">
-			<div>
+			<nav>
 				<SideMenuItem name="トップ" href="/" close={close} />
 				<SideMenuItem name="ポイント調整ツール" href="/p-calc/" close={close} />
-			</div>
+			</nav>
 			<div className="text-sm">
 				<div className="mb-2">
 					<a

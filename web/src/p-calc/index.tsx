@@ -153,8 +153,8 @@ function CalcView() {
 	return (
 		<Card>
 			<div className="flex flex-col gap-3">
-				<NumberInput label="現在のポイント" value={nowStr} onChange={setNowStr} disabled={locked} width={130} />
-				<NumberInput label="目標値" value={targetStr} onChange={setTargetStr} disabled={locked} width={130} />
+				<NumberInput label="現在ポイント" value={nowStr} onChange={setNowStr} disabled={locked} width={130} />
+				<NumberInput label="目標ポイント" value={targetStr} onChange={setTargetStr} disabled={locked} width={130} />
 				{err && <div style={{ color: "red" }}>{err}</div>}
 				<Button className="mt-1" disabled={locked || !changed || !nowStr || !targetStr} onClick={apply}>
 					計算
