@@ -44,7 +44,7 @@ function Top() {
 		<div>
 			<div>
 				<h2>
-					<Link className="text-blue-600 underline" to="/p-calc">
+					<Link className="text-blue-600 underline" to="/p-calc/">
 						ポイント調整ツール
 					</Link>
 				</h2>
