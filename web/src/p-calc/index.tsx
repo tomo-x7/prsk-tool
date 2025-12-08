@@ -1,5 +1,6 @@
 import { use, useState } from "react";
 import { createCallable } from "react-call";
+import { BiLinkExternal } from "react-icons/bi";
 import { MoonLoader } from "react-spinners";
 import { AnimatedErase, Button, Card, NumberInput } from "../Components";
 import { useDisplayMin } from "../Contexts";
@@ -24,8 +25,18 @@ export default function PCalc() {
 	}
 	return (
 		<div className="html-scroll-none">
-			<div className="max-min:text-sm">イベント編成そのままでできるポイント調整ツールです。ひとりでライブ専用。目標まで30万ポイント差まで対応しています。</div>
-			<div className="max-min:text-sm">使い方: ①イベント編成の数値を入力 ②現在のポイントと目標ポイントを入力 ③計算結果の通りにプレイ</div>
+			<div className="max-min:text-sm">
+				イベント編成そのままでできるポイント調整ツールです。ひとりでライブ専用。目標まで30万ポイント差まで対応しています。
+				<a
+					href="https://note.com/jolly_sedum2550/n/n9442252f969a"
+					target="_blank"
+					rel="noopener noreferrer"
+					className="text-blue-600 underline"
+				>
+					詳しい使い方はこちら
+					<BiLinkExternal className="inline" />
+				</a>
+			</div>
 			<div className="text-sm max-min:text-xs">イベントボーナスは小数には対応していません(WL時)。</div>
 			<BonusView />
 			{canCalc && <CalcView />}
@@ -154,7 +165,13 @@ function CalcView() {
 		<Card>
 			<div className="flex flex-col gap-3">
 				<NumberInput label="現在ポイント" value={nowStr} onChange={setNowStr} disabled={locked} width={130} />
-				<NumberInput label="目標ポイント" value={targetStr} onChange={setTargetStr} disabled={locked} width={130} />
+				<NumberInput
+					label="目標ポイント"
+					value={targetStr}
+					onChange={setTargetStr}
+					disabled={locked}
+					width={130}
+				/>
 				{err && <div style={{ color: "red" }}>{err}</div>}
 				<Button className="mt-1" disabled={locked || !changed || !nowStr || !targetStr} onClick={apply}>
 					計算

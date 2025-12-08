@@ -25,7 +25,12 @@ export function Layout() {
 				</div>
 				<div className="text-xl">{title}</div>
 				<div className="flex flex-row">
-					<a href="https://github.com/tomo-x7/prsk-tool" target="_blank" rel="noopener noreferrer" aria-label="Open GitHub">
+					<a
+						href="https://github.com/tomo-x7/prsk-tool"
+						target="_blank"
+						rel="noopener noreferrer"
+						aria-label="Open GitHub"
+					>
 						<FaGithub size={26} />
 					</a>
 				</div>
@@ -43,7 +48,7 @@ function Drawer() {
 	return (
 		<>
 			<div className="grid self-center">
-				<button type="button" onClick={() => setIsOpen(true)} aria-label="メニュー" >
+				<button type="button" onClick={() => setIsOpen(true)} aria-label="メニュー">
 					<GiHamburgerMenu size={30} />
 				</button>
 			</div>
